@@ -1,0 +1,530 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="shared-styles.html">
+<script type="text/javascript" src="qrcode.js"></script>
+<dom-module id="my-view2">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+
+            padding: 10px;
+        }
+
+        paper-button.indigo {
+            background-color: var(--paper-indigo-500);
+            color: white;
+            --paper-button-raised-keyboard-focus: {
+                background-color: var(--paper-pink-a200) !important;
+                color: white !important;
+            }
+            ;
+        }
+
+        .flex-horizontal-with-ratios {
+            @apply --layout-horizontal;
+        }
+
+        .flexchild {
+            @apply --layout-flex;
+        }
+
+        .flex2child {
+            @apply --layout-flex-2;
+        }
+
+
+
+        paper-dialog {
+            width: 60%;
+        }
+
+        paper-dialog-scrollable>div.container>div {
+            padding: 10px;
+        }
+
+        paper-dialog-scrollable>div.container paper-dropdown-menu {
+            width: 100%;
+        }
+
+        .dialog-form-input-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .dialog-form-input-row paper-input {
+            flex-grow: 1;
+            margin-right: 50px;
+        }
+
+        .dialog-form-input-row paper-input:last-child {
+            margin-right: 0px;
+        }
+        </style>
+        <paper-fab-speed-dial id="addMenu" with-backdrop>
+            <paper-fab-speed-dial-action on-tap="addProduct" icon="icons:dns">Add Product</paper-fab-speed-dial-action>
+            <paper-fab-speed-dial-action on-tap="addPart" icon="icons:build">Add Part</paper-fab-speed-dial-action>
+            <paper-fab-speed-dial-action on-tap="addCustomer" icon="icons:account-circle">Add Customer</paper-fab-speed-dial-action>
+        </paper-fab-speed-dial>
+        <paper-dialog id="addNewProduct">
+            <h2>Add New Product</h2>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-input value="{{newProduct.machine_id}}" label="Product code"></paper-input>
+                    <paper-input value="{{newProduct.name}}" label="Name"></paper-input>
+                    <paper-input value="{{newProduct.decription}}" label="Decription" ></paper-input>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewProduct" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-dialog id="addNewPart">
+            <h2>Add New Part</h2>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-input value="{{newPart.name}}" label="Name"></paper-input>
+                    <div class="dialog-form-input-row">
+                        <paper-input value="{{newPart.code}}" label="Part code"></paper-input>
+                        <paper-input value="{{newPart.price}}" label="Price" type="number"></paper-input>
+                    </div>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewPart" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-dialog id="addNewCustomer">
+            <h2>Add New Customer</h2>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-input value="{{newCust.name}}" label="Name"></paper-input>
+                    <paper-input value="{{newCust.email}}" label="Email"></paper-input>
+                    <paper-input value="{{newCust.address}}" label="Comapny Address"></paper-input>
+                    <div class="dialog-form-input-row">
+                        <paper-input value="{{newCust.state}}" label="State"></paper-input>
+                        <paper-input value="{{newCust.city}}" label="City"></paper-input>
+                        <paper-input value="{{newCust.pin}}" label="Pin Code" type="number"></paper-input>
+                    </div>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewCustomer" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <div class="container flex-horizontal-with-ratios">
+            <div class="container flex2child flex-horizontal-with-ratios">
+                <div class="flexchild card">
+                    <div>Customer List</div>
+                    <paper-datatable-api id="custListTable" page="{{custListPage}}" on-sort="_handleSortCustList" on-filter="_handleFilterCustList" paginate on-selection-changed="_handleSelectionChanged">
+                        <paper-datatable-api-column header="Name" property="name" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Email" property="email" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Address" property="address">
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                </div>
+            </div>
+            <div class="container flex2child flex-horizontal-with-ratios">
+                <div class="flexchild card">
+                    <div>Parts List</div>
+                    <paper-datatable-api id="partListTable" page="{{partListPage}}" on-sort="_handleSortPartList" on-filter="_handleFilterPartList" paginate on-selection-changed="_handleSelectionChanged">
+                        <paper-datatable-api-column header="Part Code" property="code" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Name" property="name" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Price (Rs/part)" property="price">
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                </div>
+            </div>
+        </div>
+        <div class="container flex-horizontal-with-ratios">
+            <div class="container flex2child flex-horizontal-with-ratios">
+                <div class="flexchild card">
+                    <div>Product List</div>
+                    <paper-datatable-api id="machineListTable" page="{{machineListPage}}" on-sort="_handleSortMachineList" on-filter="_handleFilterMachineList" paginate on-selection-changed="_handleSelectionChanged">
+                        <paper-datatable-api-column header="Product Code" property="machine_id" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Name" property="name" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Description" property="description">
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                </div>
+            </div>
+            <div class="container flex2child flex-horizontal-with-ratios">
+                <div class="flexchild card">
+                    <div>Generate QR sticker Image</div>
+                    <paper-input label="Comapny Name" value="{{specifications.company_name}}"></paper-input>
+                    <paper-input label="Product Id" value="{{specifications.product_id}}"></paper-input>
+                    <div style="margin:20px;" id="qrcode"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <script>
+    class MyView2 extends Polymer.Element {
+        static get is() { return 'my-view2'; }
+
+        static get observers() {
+            return [
+                // Observer method name, followed by a list of dependencies, in parenthesis
+                '_specificationsChnages(specifications.*)'
+            ]
+        }
+
+
+        static get properties() {
+            return {
+                specifications: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    observer: '_specificationsChnages',
+                    value: {
+                        company_name: "",
+                        product_id: ""
+                    }
+                },
+
+                customers: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+                parts: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+                machines: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+
+                machineListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: 'machineListPageChange',
+
+                },
+
+                partListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: 'partListPageChange',
+
+                },
+
+                custListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: 'custListPageChange',
+
+                },
+
+                qrcode: {
+                    type: Object
+                },
+
+                newCust: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    value: {}
+
+                },
+
+                newPart: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    value: {}
+
+                },
+
+                newProduct: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    value: {}
+
+                },
+
+                machinesRef: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                },
+
+                partsRef: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                },
+
+                customersRef: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                }
+
+            };
+        }
+
+        ready() {
+            super.ready();
+
+        }
+
+
+        machineListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjects(pageNumber, "", this.machines, 'machines', 'machineListTable', 'machinesRef');
+        }
+
+        _handleSortMachineList(event) {
+            console.log('_handleSort', event);
+            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+        }
+
+        _handleFilterMachineList(event) {
+            console.log('_handleFilter', event);
+
+            // this.fetchJobs(0,event.detail.filter);
+            this.fetchObjects(0, event.detail.filter, this.machines, 'machines', 'machineListTable', 'machinesRef')
+
+
+        }
+
+
+        partListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjects(pageNumber, "", this.parts, 'parts', 'partListTable', 'partsRef');
+        }
+
+        _handleSortPartList(event) {
+            console.log('_handleSort', event);
+            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+        }
+
+        _handleFilterPartList(event) {
+            console.log('_handleFilter', event);
+
+            // this.fetchJobs(0,event.detail.filter);
+            this.fetchObjects(0, event.detail.filter, this.parts, 'parts', 'partListTable', 'partsRef');
+
+
+        }
+
+
+        custListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjects(pageNumber, "", this.customers, 'customers', 'custListTable', 'customersRef');
+        }
+
+        _handleSortCustList(event) {
+            console.log('_handleSort', event);
+            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+        }
+
+        _handleFilterCustList(event) {
+            console.log('_handleFilter', event);
+
+            // this.fetchJobs(0,event.detail.filter);
+            this.fetchObjects(0, event.detail.filter, this.customers, 'customers', 'custListTable', 'customersRef');
+
+
+        }
+
+        fetchObjects(pageNumber, querry, mainArray, tableName, tableId, oldRef) {
+
+            if(this[oldRef]){
+              this[oldRef].off();
+              console.log("Discarding old ref");
+            }
+
+            var ref = firebase.database().ref('/' + tableName + '/');
+            var rootRef = firebase.database();
+            if (querry && querry.value && querry.value != "") {
+                //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
+
+                ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
+            }
+
+            this[oldRef] = ref;
+
+
+            this[oldRef].on('value', (snap) => {
+
+                mainArray = [];
+
+                snap.forEach((childSnapshot) => {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    childData.id = childKey;
+
+                    mainArray.push(childSnapshot.val());
+
+
+
+                });
+
+
+                console.log("list", tableName, mainArray);
+                var pageSize = 4;
+                this.setUpPage(mainArray, tableId, pageSize, pageNumber);
+
+                // ref.off();
+
+
+
+
+            });
+
+
+        }
+
+
+        setUpPage(objectArray, tableId, pageSize, pageNumber) {
+
+            var dataTable = this.shadowRoot.querySelector('#' + tableId);
+            var startIndex = pageNumber * pageSize;
+            var endIndex = startIndex + pageSize;
+            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+            var objectsOnPage = objectArray.slice(startIndex, endIndex);
+            dataTable.set('data', objectsOnPage);
+            dataTable.set('availableSize', [pageSize]);
+            dataTable.set('size', pageSize);
+            dataTable.set('totalPages', objectArray.length / pageSize);
+            // dataTable.set('page', 0);
+            dataTable.set('totalElements', objectArray.length);
+
+        }
+
+
+        addProduct(e) {
+            this.$.addMenu.close();
+            this.$.addNewProduct.open();
+        }
+
+        createNewProduct() {
+            var newPostKey = firebase.database().ref().child('machines').push().key;
+
+            var updates = {};
+            updates['/machines/' + newPostKey] = this.newProduct;
+
+            firebase.database().ref().update(updates);
+            this.newProduct = {};
+        }
+
+
+        addPart(e) {
+            this.$.addMenu.close();
+            this.$.addNewPart.open();
+        }
+
+        createNewPart() {
+            var newPostKey = firebase.database().ref().child('parts').push().key;
+
+            var updates = {};
+            updates['/parts/' + newPostKey] = this.newPart;
+
+            firebase.database().ref().update(updates);
+            this.newPart = {};
+        }
+
+        addCustomer(e) {
+            this.$.addMenu.close();
+            this.$.addNewCustomer.open();
+        }
+
+        createNewCustomer() {
+            var newPostKey = firebase.database().ref().child('customers').push().key;
+
+            var updates = {};
+            updates['/customers/' + newPostKey] = this.newCust;
+
+            firebase.database().ref().update(updates);
+            this.newCust = {};
+        }
+
+        connectedCallback() {
+            super.connectedCallback();
+            console.log('container', this.shadowRoot.querySelector("#qrcode"))
+            this.qrcode = new QRCode(this.shadowRoot.querySelector("#qrcode"), {
+                text: "http://jindo.dev.naver.com/collie",
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            this.qrcode.clear(); // clear the code.
+            // qrcode.makeCode("http://naver.com"); // make another code.
+        }
+
+
+        _specificationsChnages() {
+
+            if (this.qrcode) {
+                this.qrcode.makeCode(JSON.stringify(this.specifications));
+            }
+
+
+        }
+
+    }
+
+    window.customElements.define(MyView2.is, MyView2);
+    </script>
+</dom-module>

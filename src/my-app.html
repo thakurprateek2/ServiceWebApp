@@ -1,0 +1,389 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<script type="text/javascript" src="../bower_components/js-xlsx/dist/xlsx.full.min.js"></script>
+
+<link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial.html">
+<link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial-action.html">
+
+<link rel="import" href="my-icons.html">
+
+<link rel="lazy-import" href="my-view1.html">
+<link rel="lazy-import" href="my-view2.html">
+<link rel="lazy-import" href="my-view3.html">
+<link rel="lazy-import" href="my-view404.html">
+<link rel="lazy-import" href="my-view-login.html">
+<link rel="lazy-import" href="engineers-masters.html">
+<link rel="lazy-import" href="customers-masters.html">
+
+
+
+<dom-module id="my-app">
+  <template>
+    <style>
+      :host {
+        --app-primary-color: #4285f4;
+        --app-secondary-color: black;
+
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-drawer {
+        z-index: 10;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      /* .drawer-list {
+        margin: 0 20px;
+      } */
+
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+        font-size: large;
+      }
+
+      .drawer-list a.sub-item {
+        display: block;
+        padding-top: 10px;
+        padding-left: 5px;
+        padding-bottom: 10px;
+        margin: 0 32px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 20px;
+        font-size: 14px;
+        font-weight: 300;
+        border-top: 1px;
+        border-bottom: 0px;
+        border-left: 0px;
+        border-right: 0px;
+        border-color: #ddd;
+        border-style: solid;
+
+      }
+
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+    </style>
+
+    <firebase-app
+      auth-domain="serviceapp-d9b7f.firebaseapp.com"
+      database-url="https://serviceapp-d9b7f.firebaseio.com/"
+      api-key="AIzaSyAb12pS5iEjqCfBU82mzMZJe-34ZH8oFc0"
+      storage-bucket="serviceapp-d9b7f.appspot.com"
+      messaging-sender-id="858203046561">
+    </firebase-app>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPattern]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+          <app-header condenses reveals effects="waterfall">
+    <app-toolbar>
+      <paper-icon-button icon="my-icons:menu" on-tap="onMenuButtonClick"></paper-icon-button>
+      <div main-title>Service App</div>
+      <paper-icon-button icon="my-icons:close" on-tap="onLogoutClick"></paper-icon-button>
+    </app-toolbar>
+        
+  </app-header>
+
+  <app-drawer id="startDrawer" align="start">
+    <app-toolbar>Menu</app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="my-view1" href="my-view1">Dashboard</a>
+        <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="my-view2" href="my-view2">Masters</a>
+        </template>
+
+        <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="engineers-masters" class="sub-item" href="engineers-masters">Engineers</a>
+        </template>
+
+        <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="customers-masters" class="sub-item" href="customers-masters">Customers</a>
+        </template>
+
+        <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="my-view2" class="sub-item" href="my-view2">Machines and parts</a>
+        </template>
+
+        <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="my-view2" class="sub-item" href="my-view2">Feedback Setup</a>
+        </template>
+
+        <template is="dom-if" if="{{accessRights.admin}}">
+          <a name="my-view3" href="my-view3">User Management</a>
+        </template>
+
+
+
+        </iron-selector>
+  </app-drawer>
+
+  <app-drawer id="endDrawer" align="end"></app-drawer>
+
+  <iron-pages
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main">
+          <my-view1 access-rights="{{accessRights}}" name="my-view1"></my-view1>
+          <my-view2 name="my-view2"></my-view2>
+          <my-view3 name="my-view3"></my-view3>
+          <engineers-masters name="engineers-masters"></engineers-masters>
+          <customers-masters name="customers-masters"></customers-masters>          
+          <my-view404 name="my-view404"></my-view404>
+          <my-view-login name="my-view-login"></my-view-login>
+
+        </iron-pages>
+
+    <!-- <app-drawer-layout id="layout" fullbleed opened-when-narrow="{{signedIn}}">
+      Drawer content
+      <app-drawer id="drawer" slot="drawer">
+        <app-toolbar>Menu</app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="view1" href="view1">Dashboard</a>
+          <a name="view2" href="view2">Masters</a>
+          <a name="view3" href="view3">View Three</a>
+        </iron-selector>
+      </app-drawer>
+    
+      Main content
+    
+      <app-header-layout has-scrolling-region >
+    
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+            <div main-title>Service App</div>
+          </app-toolbar>
+        </app-header>
+    
+        <iron-pages
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main">
+          <my-view1 name="view1"></my-view1>
+          <my-view2 name="view2"></my-view2>
+          <my-view3 name="view3"></my-view3>
+          <my-view404 name="view404"></my-view404>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout> -->
+  </template>
+
+  <script>
+    class MyApp extends Polymer.Element {
+
+      static get is() { return 'my-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+
+          accessRights: {
+            type: Object,
+            reflectToAttribute: true,
+            value: {
+              admin: false,
+              assign_jobs: false,
+              create_jobs: false, 
+              update_jobs: false,
+              masters: false
+            }
+          },
+
+          signedIn: {
+      type: Boolean,
+      value: false,
+            reflectToAttribute: true,
+
+      observer: '_signedInChanged'
+    },
+          rootPattern: String,
+          routeData: Object,
+          subroute: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      constructor() {
+        super();
+
+        // Get root pattern for app-route, for more info about `rootPath` see:
+        // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
+        this.rootPattern = (new URL(this.rootPath)).pathname;
+      }
+
+      connectedCallback() {
+            super.connectedCallback();
+            // this.loadData();
+            firebase.auth().onAuthStateChanged((user)=> {
+              if (user) {
+                // User is signed in.
+                var displayName = user.displayName;
+                var email = user.email;
+                var emailVerified = user.emailVerified;
+                var photoURL = user.photoURL;
+                var isAnonymous = user.isAnonymous;
+                var uid = user.uid;
+                var providerData = user.providerData;
+
+                console.log("auth user", user);
+
+
+                if(user.uid === 'TDMRJHMsDQQ25ydihVqZdJkDR2w1'){
+                  this.accessRights = {
+                      admin: true,
+                      assign_jobs: true,
+                      create_jobs: true, 
+                      update_jobs: true,
+                      masters: true
+                  }
+                  this.page = 'my-view1';
+
+                }else{
+
+                  var uid = user.uid;
+
+                   firebase.database().ref('/engineers/').orderByChild("userId").equalTo(uid)
+                    .once('value', (snap) => {
+
+                      snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        childData.id = childKey;
+                        console.log("engg", childData);
+                        this.accessRights = childData.rights;
+                        this.page = 'my-view1';
+                      });
+                    });
+
+
+                }
+
+                // ...
+              } else {
+                // User is signed out.
+                // ...
+                this.page = 'my-view-login'
+
+              }
+            });
+        }
+
+      _signedInChanged(){
+        console.log("_signedInChanged")
+        
+        /*if(!this.signedIn){
+          this.$.drawer.close();
+           this.$.layout.resetLayout();
+        }*/
+
+      }
+
+      onLogoutClick(){
+        firebase.auth().signOut()
+      }
+
+      onMenuButtonClick(){
+        console.log("onMenuButtonClick")
+        this.$.startDrawer.toggle()
+
+      }
+
+      _routePageChanged(page) {
+        // Polymer 2.0 will call with `undefined` on initialization.
+        // Ignore until we are properly called with a string.
+        if (page === undefined) {
+          return;
+        }
+
+        var user = firebase.auth().currentUser;
+        console.log('user', user);
+
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'view1' in that case.
+        if(!user){
+          this.page = 'my-view404'
+        }else{
+            this.page = page || 'my-view1';
+        }
+
+        // Close a non-persistent drawer when the page & route are changed.
+        /*if (!this.$.drawer.persistent) {
+          this.$.drawer.close();
+        }*/
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        debugger;
+        var resolvedPageUrl = this.resolveUrl(page + '.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      _showPage404() {
+        this.page = 'my-view404';
+      }
+    }
+
+    window.customElements.define(MyApp.is, MyApp);
+  </script>
+</dom-module>

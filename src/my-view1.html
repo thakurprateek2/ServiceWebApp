@@ -1,0 +1,1200 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="shared-styles.html">
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="vizuly_core.min.js"></script>
+<script src="vizuly_radialprogress.min.js"></script>
+<script src="radialprogress.js"></script>
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-search.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/datetime-picker/time-element.html">
+<link rel="import" href="../bower_components/datetime-picker/calendar-element.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../bower_components/paper-datatable-api/paper-datatable-api-column.html">
+<link rel="import" href="../bower_components/paper-datatable-api/paper-datatable-api.html">
+<link rel="import" href="job-description.html">
+<!-- <link rel="stylesheet" href="styles/vizuly.css">
+<link rel="stylesheet" href="styles/vizuly_radial_progress.css"> -->
+<dom-module id="my-view1">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+
+            padding: 10px;
+        }
+
+        .chart-gauge {
+            width: 200px;
+        }
+
+        .chart-filled {
+            fill: steelblue;
+        }
+
+        .chart-empty {
+            fill: #dedede;
+        }
+
+        .needle,
+        .needle-center {
+            fill: #464A4F;
+        }
+
+        svg {
+            font: 10px sans-serif;
+        }
+
+        .flex-horizontal-with-ratios {
+            @apply --layout-horizontal;
+        }
+
+        .flexchild {
+            @apply --layout-flex;
+        }
+
+        .flex2child {
+            @apply --layout-flex-2;
+        }
+
+        .flex3child {
+            @apply --layout-flex-3;
+        }
+
+        .flex6child {
+            @apply --layout-flex-6;
+        }
+
+        .centered-box {
+            @apply(--layout-horizontal);
+            @apply(--layout-center-justified);
+            width: 100%;
+        }
+
+        paper-card {
+            margin: 24px;
+            color: #757575;
+        }
+
+        .card-actions {
+            padding: 10px;
+        }
+
+        .num-card {
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .chart-card {
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .num-card div.num-container,
+        .chart-card div.chart-container {
+            @apply(--layout-horizontal);
+            @apply(--layout-center-justified);
+            width: 100%;
+        }
+
+        .num-card div.num-container>div {
+            font-size: 60px;
+            height: 110px;
+        }
+
+        .chart-card div.chart-container>div {
+            height: 110px;
+        }
+
+        .chart-card div.chart-footer {
+            border-top: 1px solid #e8e8e8;
+            padding-top: 10px;
+            @apply(--layout-horizontal);
+            @apply(--layout-center-justified);
+        }
+
+        .num-card div.num-footer {
+            border-top: 1px solid #e8e8e8;
+            padding-top: 10px;
+            @apply(--layout-horizontal);
+            @apply(--layout-center-justified);
+        }
+
+        .vizuly {
+            fill: #FFFFFF;
+        }
+
+        paper-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+        }
+
+        paper-dialog {
+            position: relative;
+            margin-left: 30px;
+            margin-right: 30px;
+        }
+
+        paper-dialog>h2 {
+            padding-top: 24px;
+        }
+
+        google-map {
+            height: 300px;
+        }
+
+        .job-schedule-datepicker {
+            padding: 20px;
+        }
+
+        .job-schedule {
+            padding-top: 30px;
+            padding-left: 30px;
+        }
+
+        paper-dialog-scrollable>div.container>div {
+            padding: 10px;
+        }
+
+        paper-dialog-scrollable>div.container paper-dropdown-menu {
+            width: 100%;
+        }
+        </style>
+        <!-- <paper-fab mini icon="example:location"></paper-fab> -->
+        <template is="dom-if" if="{{accessRights.create_jobs}}">
+            <paper-fab icon="add" on-tap="onAddJob"></paper-fab>
+        </template>
+        <iron-meta key="SOME" value="YO"></iron-meta>
+        <paper-dialog id="jobDetailsDialog">
+            <paper-dialog-scrollable>
+                <job-description job="{{selectedJob}}">
+                </job-description>
+            </paper-dialog-scrollable>
+             <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="jobListDialog">
+            <template is="dom-if" if="{{isJobListLoading}}">
+                <h3 style="padding:20px">Loading Please wait...</h3>
+            </template>
+            <template is="dom-if" if="{{!isJobListLoading}}">
+
+             <paper-datatable-api id="statusJobListTable" page="{{jobListPage}}" on-sort="_handleSortJobList" on-filter="_handleFilterJobList" paginate on-selection-changed="_handleSelectionChanged">
+                        <paper-datatable-api-column header="Date" property="createdTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Status" property="status" hideable>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Customer Name" property="customer.name" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
+                            <template>
+                                <span>[[value.first_name]]</span>
+                                <span>[[value.last_name]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Updated" property="updatedTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                </template>
+                    <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+
+        <paper-dialog id="scrolling">
+            <h2>Add new job</h2>
+            <paper-dialog-scrollable>
+                <div class="container flex-horizontal-with-ratios">
+                    <div class="flex2child">
+                        <paper-dropdown-menu label="Select Customer" on-selected-item-changed="custSelected">
+                            <paper-listbox slot="dropdown-content">
+                                <template is="dom-repeat" items="{{customers}}" as="cust">
+                                    <paper-item label="{{cust.name}}" obj="{{cust}}">
+                                        <paper-item-body two-line>
+                                            <div>{{cust.name}}</div>
+                                            <div secondary>{{cust.address}}</div>
+                                        </paper-item-body>
+                                    </paper-item>
+                                </template>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                    </div>
+                    <div class="flexchild">
+                        <paper-dropdown-menu label="Select Job Type" on-selected-item-changed="jobTypeSelected">
+                            <paper-listbox slot="dropdown-content">
+                                <paper-item label="Repair" obj="Repair">
+                                    <paper-item-body>
+                                        <div>Repair</div>
+                                    </paper-item-body>
+                                </paper-item>
+                                <paper-item label="Maintainance" obj="Maintainance">
+                                    <paper-item-body>
+                                        <div>Maintainance</div>
+                                    </paper-item-body>
+                                </paper-item>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                    </div>
+                    <div class="flexchild">
+                        <paper-dropdown-menu label="Select Machine" on-selected-item-changed="machineSelected">
+                            <paper-listbox slot="dropdown-content">
+                                <template is="dom-repeat" items="{{machines}}" as="machine">
+                                    <paper-item label="{{machine.name}}" obj="{{machine}}">
+                                        <paper-item-body two-line>
+                                            <div>{{machine.name}}</div>
+                                            <div secondary>{{machine.machine_id}}</div>
+                                        </paper-item-body>
+                                    </paper-item>
+                                </template>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                    </div>
+                </div>
+                <div class="container flex-horizontal-with-ratios">
+                    <div class="flexchild">
+                        <paper-input label="Comapny Address" value="{{selectedCustomer.address}}"></paper-input>
+                        <google-map-search map="[[map]]" query="{{companyAddress}}" results="{{results}}">
+                        </google-map-search>
+
+                        <google-map fit-to-markers id="customerMap">
+                          <google-map-marker latitude="37.78" longitude="-122.4" draggable="true"></google-map-marker>
+                          <template is="dom-if" if="{{selectedCustomer}}">
+
+                            <google-map-marker latitude="{{selectedCustomer.latitude}}" longitude="{{selectedCustomer.longitude}}" draggable="true"></google-map-marker>
+                          </template>
+                        </google-map>
+                        <!-- <google-map fit-to-markers id="customerMap" >
+                            <template is="dom-if" if="{{selectedCustomer}}">
+                                <google-map-marker latitude="{{selectedCustomer.latitude}}" longitude="{{selectedCustomer.longitude}}">
+                                    <h2>{{selectedCustomer.name}}</h2>
+                                    <span>{{selectedCustomer.address}}</span>
+                                </google-map-marker>
+                            </template>
+                        </google-map> -->
+                    </div>
+                    <div class="flexchild">
+                        <paper-dropdown-menu label="Select Engineer" on-selected-item-changed="engineerSelected">
+                            <paper-listbox slot="dropdown-content">
+                                <template is="dom-repeat" items="{{engineers}}" as="engg">
+                                    <paper-item label="{{engg.first_name}} {{engg.last_name}}" obj="{{engg}}">
+                                        <paper-item-body two-line>
+                                            <div>{{engg.first_name}} {{engg.last_name}}</div>
+                                            <div secondary>{{engg.email}}</div>
+                                        </paper-item-body>
+                                    </paper-item>
+                                </template>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                        <br>
+                        <paper-checkbox checked="{{schedule}}">Schedule Job</paper-checkbox>
+                        <template is="dom-if" if="{{schedule}}">
+                            <div class="job-schedule-datepicker">
+                                <calendar-element></calendar-element>
+                                <time-element></time-element>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewJob" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <div class="container flex-horizontal-with-ratios">
+            <div class="flexchild card num-card" on-tap="showInProgressJobs">
+                <div class="num-container">
+                    <div>{{analytics.inProgress}}</div>
+                </div>
+                <div class="num-footer">
+                    <div>In Progress</div>
+                </div>
+            </div>
+            <div class="flexchild card num-card" on-tap="showOnHoldJobs">
+                <div class="num-container">
+                    <div>{{analytics.onHold}}</div>
+                </div>
+                <div class="num-footer">
+                    <div>On Hold</div>
+                </div>
+            </div>
+            <div class="flexchild card num-card">
+                <div class="num-container">
+                    <div>{{analytics.reschedule}}</div>
+                </div>
+                <div class="num-footer">
+                    <div>Reschedule requests</div>
+                </div>
+            </div>
+            <div class="flexchild card num-card" on-tap="showClosedJobs">
+                <div class="num-container">
+                    <div id="div1"></div>
+                </div>
+                <div class="num-footer">
+                    <div>Jobs Closed</div>
+                </div>
+            </div>
+        </div>
+        <div class="container flex-horizontal-with-ratios">
+            <div class="container flex2child">
+                <div class="container flex2child flex-horizontal-with-ratios">
+                    <div class="flexchild card num-card" on-tap="showOpenJobs">
+                        <div class="num-container">
+                            <div>{{analytics.open}}</div>
+                        </div>
+                        <div class="num-footer">
+                            <div>Open Jobs</div>
+                        </div>
+                    </div>
+                    <div class="flexchild card chart-card">
+                        <div class="chart-container">
+                            <div class="chart-gauge"></div>
+                        </div>
+                        <div class="chart-footer">
+                            <div>Engineers</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container flex2child flex-horizontal-with-ratios">
+                    <div class="flexchild card">
+                        <div>Engineers List</div>
+                        <paper-datatable-api id="enggListTable" page="{{enggListPage}}" on-sort="_handleSortEnggList" on-filter="_handleFilterEnggList" paginate on-selection-changed="_handleSelectionChanged">
+                            <paper-datatable-api-column header="First Name" property="first_name" filter>
+                                <template>
+                                    <span>[[value]]</span>
+                                </template>
+                            </paper-datatable-api-column>
+                            <paper-datatable-api-column header="Last Name" property="last_name" filter>
+                                <template>
+                                    <span>[[value]]</span>
+                                </template>
+                            </paper-datatable-api-column>
+                            <paper-datatable-api-column header="" property="email" filter>
+                                <template>
+                                    <span>[[value]]</span>
+                                </template>
+                            </paper-datatable-api-column>
+                        </paper-datatable-api>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="flexchild card">two</div> -->
+            <div class="container flex2child flex-horizontal-with-ratios">
+                <div id="job-list" style="overflow: auto;" class="flexchild card">
+                    <div>Job List</div>
+                    <paper-datatable-api on-tap-tr="onJobTableRowClick" id="jobListTable" page="{{jobListPage}}" on-sort="_handleSortJobList" on-filter="_handleFilterJobList" paginate on-selection-changed="_handleSelectionChanged">
+                        <paper-datatable-api-column header="Date" property="createdTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Status" property="status" hideable>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Customer Name" property="customer.name" filter>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
+                            <template>
+                                <span>[[value.first_name]]</span>
+                                <span>[[value.last_name]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Updated" property="updatedTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                    <!-- <iron-list scroll-target="job-list">
+                        <div>
+                            <template is="dom-repeat" items="{{jobs}}" as="job">
+                                <paper-item label="{{job.customer.name}}" obj="{{job}}" on-tap="showJob">
+                                    <paper-item-body two-line>
+                                        <div><b>{{job.customer.name}}</b></div>
+                                        <div secondary>{{job.engineer.first_name}} {{job.engineer.last_name}}</div>
+                                        <div secondary>{{job.machine.name}}</div>
+                                    </paper-item-body>
+                                </paper-item>
+                            </template>
+                        </div>
+                    </iron-list> -->
+                </div>
+            </div>
+        </div>
+    </template>
+    <script>
+    class MyView1 extends Polymer.Element {
+        static get is() { return 'my-view1'; }
+
+
+        ready() {
+            super.ready();
+            console.log("my-view1 is ready", firebase);
+            setTimeout(function() {
+                // this.setUpRadial();
+            }.bind(this), 1000);
+            // .once('value').then((snap)=>{console.log("snap", snap)}, (err)=>{console.log("err", err)})
+        }
+
+        static get properties() {
+            return {
+                isJobListLoading: {
+                    type: Boolean,
+                    value: false,
+                    reflectToAttribute: true
+
+                },
+
+                accessRights: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                },
+
+                analytics: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                },
+                customers: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+                machines: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+                engineerCount: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    value: 0
+                },
+
+                engineers: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    value: []
+                },
+
+                jobs: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                jobListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: '_jobListPageChange',
+
+                },
+
+                selectedStatus: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    observer: '_stausJobListPageChange',                    
+                },
+
+                stausJobListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: '_stausJobListPageChange',
+
+                },
+
+                enggListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: '_enggListPageChange',
+
+                },
+
+                companyAddress: {
+                    type: String
+                },
+
+                selectedCustomer: {
+                    type: Object,
+                    reflectToAttribute: true
+                },
+
+                selectedEngineer: {
+                    type: Object,
+                    reflectToAttribute: true
+                },
+
+                selectedMachine: {
+                    type: Object,
+                    reflectToAttribute: true
+                },
+
+                selectedJobType: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+
+                selectedJob: {
+                    type: Object,
+                    reflectToAttribute: true
+                },
+
+                schedule: {
+                    type: Boolean,
+                    value: false
+                }
+            };
+        }
+
+        showInProgressJobs(e){
+            this.set('isJobListLoading' ,true);
+            this.set('selectedStatus' ,'In Progress');            
+            this.shadowRoot.querySelector("#jobListDialog").open();            
+        }
+
+        showOnHoldJobs(e){
+            this.set('isJobListLoading' ,true);
+            this.set('selectedStatus' ,'On Hold');            
+            this.shadowRoot.querySelector("#jobListDialog").open();            
+        }
+
+        showOpenJobs(e){
+            this.set('isJobListLoading' ,true);
+            this.set('selectedStatus' ,'Open');            
+            this.shadowRoot.querySelector("#jobListDialog").open();            
+        }
+
+        showClosedJobs(e){
+            this.set('isJobListLoading' ,true);
+            this.set('selectedStatus' ,'Closed');            
+            this.shadowRoot.querySelector("#jobListDialog").open();            
+        }
+
+        /*TODO
+        showRescheduleJobs(e){
+            this.set('isJobListLoading' ,true);
+            this.set('selectedStatus' ,'In Progress');            
+            this.shadowRoot.querySelector("#jobListDialog").open();            
+        }*/
+
+        onJobTableRowClick(e){
+
+            console.log("onJobTableRowClick", e);
+
+            this.selectedJob = e.detail.row;
+            this.shadowRoot.querySelector("#jobDetailsDialog").open();
+
+        }
+
+        getDateFromTime(time) {
+            console.log('getDateFromTime', time, (time && time != ""));
+            if (time && time != "") {
+                return moment.unix(time * -1).format('h:mm a DD MMM YY');
+            } else {
+                return "-- --- ---- -:-- -"
+            }
+        }
+
+
+        _handleSortEnggList(event) {
+            console.log('_handleSort', event);
+            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+        }
+
+        _handleFilterEnggList(event) {
+            console.log('_handleFilter', event);
+
+
+            if (event.detail.filter.property === "engineer") {
+                event.detail.filter.property = "engineer.first_name";
+            }
+            // this.fetchJobs(0,event.detail.filter);
+            this.fetchObjects(0, event.detail.filter, this.engineers, 'engineers', 'enggListTable', 'enggRef')
+
+
+        }
+
+        _handleSortJobList(event) {
+            console.log('_handleSort', event);
+            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+        }
+
+        _handleFilterJobList(event) {
+            console.log('_handleFilter', event);
+
+
+            if (event.detail.filter.property === "engineer") {
+                event.detail.filter.property = "engineer.first_name";
+            }
+            this.fetchObjects(0, event.detail.filter, this.jobs, 'jobs', 'jobListTable', 'jobsRef')
+
+
+        }
+
+        _handleSelectionChanged(event) {
+            console.log('_handleSelectionChanged', event);
+
+        }
+
+        _enggListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjects(pageNumber, "", this.engineers, 'engineers', 'enggListTable', 'enggRef');
+        }
+
+        _stausJobListPageChange() {
+            console.log('_pageChanged', this.stausJobListPage);
+            this.fetchObjects(this.stausJobListPage, {property: 'status', value: this.selectedStatus}, this.statusJobs, 'jobs', 'statusJobListTable', 'statusJobsRef',
+                ()=>{
+                    console.log('Callback fired');
+                    this.set('isJobListLoading', false);
+                });
+        }
+
+        _jobListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjects(pageNumber, "", this.jobs, 'jobs', 'jobListTable', 'jobsRef');
+        }
+
+        fetchObjects(pageNumber, querry, mainArray, tableName, tableId, oldRefName, callback) {
+
+            if (this[oldRefName]) {
+                this[oldRefName].off();
+                console.log("Discarding old ref", oldRefName);
+
+            }
+
+            var ref = firebase.database().ref('/' + tableName + '/');
+            var rootRef = firebase.database();
+            if (querry && querry.value && querry.value != "") {
+                //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
+
+                ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
+            }
+
+            this[oldRefName] = ref;
+
+
+            this[oldRefName].on('value', (snap) => {
+
+                mainArray = [];
+
+                snap.forEach((childSnapshot) => {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    childData.id = childKey;
+
+                    mainArray.push(childSnapshot.val());
+
+
+
+                });
+
+
+                console.log("list", tableName, mainArray);
+                var pageSize = 4;
+                this.setUpPage(mainArray, tableId, pageSize, pageNumber);
+
+                if(callback){
+                    callback();
+                }
+
+
+
+
+            });
+
+        }
+
+
+        setUpPage(objectArray, tableId, pageSize, pageNumber) {
+
+            var dataTable = this.shadowRoot.querySelector('#' + tableId);
+            var startIndex = pageNumber * pageSize;
+            var endIndex = startIndex + pageSize;
+            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+            var objectsOnPage = objectArray.slice(startIndex, endIndex);
+            dataTable.set('data', objectsOnPage);
+            dataTable.set('availableSize', [pageSize]);
+            dataTable.set('size', pageSize);
+            dataTable.set('totalPages', objectArray.length / pageSize);
+            // dataTable.set('page', 0);
+            dataTable.set('totalElements', objectArray.length);
+
+        }
+
+
+        connectedCallback() {
+            super.connectedCallback();
+            this.loadData();
+        }
+
+        loadData() {
+            firebase.database().ref('/customers/')
+                .once('value', (snap) => {
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        childData.id = childKey;
+                        this.push('customers', childData);
+                    });
+                });
+
+
+            firebase.database().ref('/machines/')
+                .once('value', (snap) => {
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        childData.id = childKey;
+                        this.push('machines', childData);
+                    });
+                });
+
+
+            firebase.database().ref('/analytics/')
+                .on('value', (snap) => {
+                    this.analytics = snap.val();
+                    console.log('analytics', this.analytics);
+                    this.setUpRadial(this.analytics.closed, this.analytics.total);
+
+                    firebase.database().ref('/engineers/')
+                        .on('value', (snap) => {
+                            this.engineerCount = 0;
+                            snap.forEach((childSnapshot) => {
+                                var childKey = childSnapshot.key;
+                                var childData = childSnapshot.val();
+                                // ...
+                                childData.id = childKey;
+                                this.engineerCount++;
+                                this.push('engineers', childData);
+                            });
+
+                            if (!this.analytics.engineersWorking) {
+                                this.analytics.engineersWorking = 0;
+                            }
+
+                            this.setUpGauge(this.analytics.engineersWorking, this.engineerCount);
+
+                        });
+                });
+
+
+
+
+            /*firebase.database().ref('/jobs/').on('child_added', (data) => {
+                this.push('jobs', data.val());
+
+                console.log("jobs", this.jobs);
+                var jobsTable = this.shadowRoot.querySelector('paper-datatable-api');
+                jobsTable.set('data', this.jobs);
+                jobsTable.set('availableSize', [5]);
+                jobsTable.set('totalPages', 10);
+                jobsTable.set('page', 0);
+                jobsTable.set('size', 5);
+                jobsTable.set('totalPages', 10);
+                jobsTable.set('totalElements', 50);
+
+
+            });*/
+
+
+
+        }
+
+        selectDate(e) {
+            console.log('selectDate', e);
+        }
+
+
+        createNewJob() {
+            console.log("createNewJob");
+            // A post entry.
+            var postData = {
+                engineer: this.selectedEngineer,
+                machine: this.selectedMachine,
+                customer: this.selectedCustomer,
+                jobType: this.selectedJobType,
+                status: 'Open'
+            };
+
+            if (this.schedule) {
+                var cElement = this.shadowRoot.querySelector('calendar-element');
+                var tElement = this.shadowRoot.querySelector('time-element');
+                var scheduleMomemt = moment(cElement.date + ' ' + tElement.time, 'YYYY-MM-DD HH:mm:ss.SSS');
+                postData.scheduleDate = scheduleMomemt.toISOString();
+            }
+
+            // Get a key for a new Post.
+            var newPostKey = firebase.database().ref().child('jobs').push().key;
+
+            // Write the new post's data simultaneously in the posts list and the user's post list.
+            var updates = {};
+            updates['/jobs/' + newPostKey] = postData;
+            updates['/engineers_job/' + this.selectedEngineer.id + '/' + newPostKey] = {
+                machine: this.selectedMachine,
+                customer: this.selectedCustomer
+            };
+
+            return firebase.database().ref().update(updates);
+        }
+
+        custSelected(e) {
+
+            console.log('custSelected', e);
+            if (e.detail && e.detail.value) {
+                this.set('selectedCustomer', e.detail.value.obj);
+            }
+
+            window.custMap = this.shadowRoot.querySelector("#customerMap");
+
+            window.custMap.latitude= this.selectedCustomer.latitude; 
+            window.custMap.longitude=this.selectedCustomer.longitude;
+
+            this.shadowRoot.querySelector("#customerMap").resize();
+
+            var Item_1 = new google.maps.LatLng(45.5983128, 8.9172776);
+
+            var myPlace = new google.maps.LatLng(45.4555729, 9.169236);
+
+            var myPlace = new google.maps.LatLng(45.4555729, 9.169236);
+
+            var marker1 = new google.maps.Marker({
+                position: Item_1,
+                map: window.custMap.map
+            });
+
+            var marker2 = new google.maps.Marker({
+                position: myPlace,
+                map: window.custMap.map
+            });
+
+            this.shadowRoot.querySelector("#customerMap").set('markers', [marker1, marker2]);
+
+
+
+
+
+
+        }
+
+        machineSelected(e) {
+
+            console.log('machineSelected', e);
+            if (e.detail && e.detail.value) {
+                this.set('selectedMachine', e.detail.value.obj);
+            }
+
+        }
+
+        engineerSelected(e) {
+
+            console.log('engineerSelected', e);
+            if (e.detail && e.detail.value) {
+                this.set('selectedEngineer', e.detail.value.obj);
+            }
+
+        }
+
+        jobTypeSelected(e) {
+
+            console.log('jobTypeSelected', e);
+            if (e.detail && e.detail.value) {
+                this.set('selectedJobType', e.detail.value.getAttribute('obj'));
+            }
+
+        }
+
+        onAddJob() {
+            /*var tElement =  this.shadowRoot.querySelector('time-element');
+            tElement.time = "12:00:00.000"*/
+            this.shadowRoot.querySelector("#scrolling").open();
+        }
+
+        /*showJob(e) {
+            console.log('job', this.jobs[e.model.itemsIndex]);
+            this.selectedJob = this.jobs[e.model.itemsIndex];
+            this.shadowRoot.querySelector("#jobDetailsDialog").open();
+        }*/
+
+
+        setUpRadial(closed, total) {
+
+            var radialDiv = Polymer.dom(this.root).querySelector("#div1");
+
+            while (radialDiv.hasChildNodes()) {
+                radialDiv.removeChild(radialDiv.lastChild);
+            }
+
+
+            var viz1 = vizuly.viz.radial_progress(radialDiv);
+
+            vizuly.theme.radial_progress(viz1).skin("BusinessLight");
+
+            viz1.data(closed) // Current value
+                .height(100) // Height of component - radius is calculated automatically for us
+                .min(0) // min value
+                .max(total) // max value
+                .capRadius(1)
+                .startAngle(250) // Angle where progress bar starts
+                .endAngle(110) // Angle where the progress bar stops
+                .arcThickness(.12) // The thickness of the arc (ratio of radius)
+                .label(function(d, i) { // The 'label' property allows us to use a dynamic function for labeling.
+                    return d3.format(".0f")(d);
+                });
+
+            viz1.width(120).radius(120 / 2.2).update();
+
+
+        }
+
+
+        setUpGauge(activeCount, total) {
+
+            var needle;
+
+            var barWidth, chart, chartInset, degToRad, repaintGauge,
+                height, margin, numSections, padRad, percToDeg, percToRad,
+                percent, radius, sectionIndx, svg, totalPercent, width, sectionPerc, el, arc1, arc2, arcStartRad, arcEndRad;
+
+            var labelHeight = 20;
+
+            percent = activeCount / total; //.65;
+            numSections = 1;
+            sectionPerc = 1 / numSections / 2;
+            padRad = 0.025;
+            chartInset = 10;
+
+            // Orientation of gauge:
+            totalPercent = .75;
+
+            el = d3.select(Polymer.dom(this.root).querySelector('.chart-gauge'));
+            el.html("");
+
+            margin = {
+                top: 5,
+                right: 5,
+                bottom: 10,
+                left: 5
+            };
+
+            width = el[0][0].offsetWidth; //- margin.left - margin.right;
+            height = width;
+            radius = (Math.min(width, height) / 2) - labelHeight;
+            barWidth = 40 * width / 300;
+
+
+            /*
+              Utility methods 
+            */
+            percToDeg = function(perc) {
+                return perc * 360;
+            };
+
+            percToRad = function(perc) {
+                return degToRad(percToDeg(perc));
+            };
+
+            degToRad = function(deg) {
+                return deg * Math.PI / 180;
+            };
+
+            el.append('svg').attr('width', width + margin.left + margin.right).attr('height', 20)
+                .append('text')
+                .attr("x", (width + margin.left + margin.right) / 2)
+                .attr("y", 10)
+                .text(activeCount + " of " + total + " working")
+                .attr("text-anchor", "middle")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "11px");
+
+            // Create SVG element
+            svg = el.append('svg').attr('width', width + margin.left + margin.right).attr('height', height / 2 + margin.top + margin.bottom);
+
+
+            // Add layer for the panel
+            chart = svg.append('g').attr('transform', "translate(" + ((width + margin.left) / 2) + ", " + ((height + margin.top - (2 * labelHeight)) / 2) + ")");
+            chart.append('path').attr('class', "arc chart-filled");
+            chart.append('path').attr('class', "arc chart-empty");
+
+            arc2 = d3.svg.arc().outerRadius(radius - chartInset).innerRadius(radius - chartInset - barWidth)
+            arc1 = d3.svg.arc().outerRadius(radius - chartInset).innerRadius(radius - chartInset - barWidth)
+
+            repaintGauge = function(perc) {
+                var next_start = totalPercent;
+                arcStartRad = percToRad(next_start);
+                arcEndRad = arcStartRad + percToRad(perc / 2);
+                next_start += perc / 2;
+
+
+                arc1.startAngle(arcStartRad).endAngle(arcEndRad);
+
+                arcStartRad = percToRad(next_start);
+                arcEndRad = arcStartRad + percToRad((1 - perc) / 2);
+
+                arc2.startAngle(arcStartRad + padRad).endAngle(arcEndRad);
+
+
+                chart.select(".chart-filled").attr('d', arc1);
+                chart.select(".chart-empty").attr('d', arc2);
+
+            }
+
+
+            var Needle = (function() {
+
+                /** 
+                 * Helper function that returns the `d` value
+                 * for moving the needle
+                 **/
+                var recalcPointerPos = function(perc) {
+                    var centerX, centerY, leftX, leftY, rightX, rightY, thetaRad, topX, topY;
+                    thetaRad = percToRad(perc / 2);
+                    centerX = 0;
+                    centerY = 0;
+                    topX = centerX - this.len * Math.cos(thetaRad);
+                    topY = centerY - this.len * Math.sin(thetaRad);
+                    leftX = centerX - this.radius * Math.cos(thetaRad - Math.PI / 2);
+                    leftY = centerY - this.radius * Math.sin(thetaRad - Math.PI / 2);
+                    rightX = centerX - this.radius * Math.cos(thetaRad + Math.PI / 2);
+                    rightY = centerY - this.radius * Math.sin(thetaRad + Math.PI / 2);
+                    return "M " + leftX + " " + leftY + " L " + topX + " " + topY + " L " + rightX + " " + rightY;
+                };
+
+                function Needle(el) {
+                    this.el = el;
+                    this.len = width / 3;
+                    this.radius = this.len / 6;
+                }
+
+                Needle.prototype.render = function() {
+                    this.el.append('circle').attr('class', 'needle-center').attr('cx', 0).attr('cy', 0).attr('r', this.radius);
+                    return this.el.append('path').attr('class', 'needle').attr('d', recalcPointerPos.call(this, 0));
+                };
+
+                Needle.prototype.moveTo = function(perc) {
+                    var self,
+                        oldValue = this.perc || 0;
+
+                    this.perc = perc;
+                    self = this;
+
+                    // Reset pointer position
+                    this.el.transition().delay(100).ease('quad').duration(200).select('.needle').tween('reset-progress', function() {
+                        return function(percentOfPercent) {
+                            var progress = (1 - percentOfPercent) * oldValue;
+
+                            repaintGauge(progress);
+                            return d3.select(this).attr('d', recalcPointerPos.call(self, progress));
+                        };
+                    });
+
+                    this.el.transition().delay(300).ease('bounce').duration(1500).select('.needle').tween('progress', function() {
+                        return function(percentOfPercent) {
+                            var progress = percentOfPercent * perc;
+
+                            repaintGauge(progress);
+                            return d3.select(this).attr('d', recalcPointerPos.call(self, progress));
+                        };
+                    });
+
+                };
+
+                return Needle;
+
+            })();
+
+            needle = new Needle(chart);
+            needle.render();
+
+            needle.moveTo(percent);
+
+        }
+
+        /*{
+  "rules": {
+    "users": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth.uid === $uid"
+      }
+    },
+    "followers": {
+      "$followedUid": {
+        "$followerUid": {
+          ".read": "auth.uid === $followerUid",
+          ".write": "auth.uid === $followerUid"
+        }
+      }
+    }
+  }
+}
+*/
+
+
+    }
+
+    window.customElements.define(MyView1.is, MyView1);
+    </script>
+</dom-module>
