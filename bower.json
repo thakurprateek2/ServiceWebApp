@@ -32,7 +32,9 @@
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
     "moment": "^2.18.1",
     "bwt-datatable": "^2.0.1",
-    "paper-datatable-api": "RoXuS/paper-datatable-api#^2.0.10"
+    "paper-datatable-api": "RoXuS/paper-datatable-api#^2.0.10",
+    "paper-fab-speed-dial": "Collaborne/paper-fab-speed-dial#^2.4.0",
+    "js-xlsx": "^0.11.17"
   },
   "resolutions": {
     "polymer": "^2.0.0-rc.3",

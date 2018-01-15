@@ -20,7 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<!-- <link rel="import" href="../bower_components/polymerfire/firebase-app.html"> -->
 <script type="text/javascript" src="../bower_components/js-xlsx/dist/xlsx.full.min.js"></script>
 
 <link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial.html">
@@ -104,13 +104,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <firebase-app
+    <!-- <firebase-app
       auth-domain="serviceapp-d9b7f.firebaseapp.com"
       database-url="https://serviceapp-d9b7f.firebaseio.com/"
       api-key="AIzaSyAb12pS5iEjqCfBU82mzMZJe-34ZH8oFc0"
       storage-bucket="serviceapp-d9b7f.appspot.com"
       messaging-sender-id="858203046561">
-    </firebase-app>
+    </firebase-app> -->
 
     <app-location route="{{route}}"></app-location>
     <app-route
@@ -370,7 +370,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page) {
         // Load page import on demand. Show 404 page if fails
-        debugger;
         var resolvedPageUrl = this.resolveUrl(page + '.html');
         Polymer.importHref(
             resolvedPageUrl,
