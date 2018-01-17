@@ -26,7 +26,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/google-map/google-map-search.html">
 <link rel="import" href="../bower_components/google-map/google-map-marker.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/datetime-picker/time-element.html">
@@ -424,9 +423,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <!-- <div class="flexchild card">two</div> -->
             <div class="container flex2child flex-horizontal-with-ratios">
                 <div id="job-list" style="overflow: auto;" class="flexchild card">
-                    <div>Job List</div>
+                    <div><iron-icon icon="my-icons:menu"></iron-icon> Warnings</div>
                     <paper-datatable-api on-tap-tr="onJobTableRowClick" id="jobListTable" page="{{jobListPage}}" on-sort="_handleSortJobList" on-filter="_handleFilterJobList" paginate on-selection-changed="_handleSelectionChanged">
-                        <paper-datatable-api-column header="Date" property="createdTime" hideable>
+                        <!-- <paper-datatable-api-column header="Date" property="createdTime" hideable>
                             <template>
                                 <span>[[getDateFromTime(value)]]</span>
                             </template>
@@ -435,10 +434,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <template>
                                 <span>[[value]]</span>
                             </template>
-                        </paper-datatable-api-column>
-                        <paper-datatable-api-column header="Customer Name" property="customer.name" filter>
+                        </paper-datatable-api-column> -->
+                        <paper-datatable-api-column header="Customer Name" property="message" filter>
                             <template>
-                                <span>[[value]]</span>
+                                <span>[[value.customerName]]</span><br>  
+                                <span style="color: #F44336;">[[value.warningMessage]]</span>
                             </template>
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
@@ -668,7 +668,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 event.detail.filter.property = "engineer.first_name";
             }
             // this.fetchJobs(0,event.detail.filter);
-            this.fetchObjects(0, event.detail.filter, this.engineers, 'engineers', 'enggListTable', 'enggRef')
+            this.fetchObjectsForTable(0, event.detail.filter, this.engineers, 'engineers', 'enggListTable', 'enggRef')
 
 
         }
@@ -685,7 +685,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if (event.detail.filter.property === "engineer") {
                 event.detail.filter.property = "engineer.first_name";
             }
-            this.fetchObjects(0, event.detail.filter, this.jobs, 'jobs', 'jobListTable', 'jobsRef')
+            this.fetchObjectsForTable(0, event.detail.filter, this.jobs, 'jobs', 'jobListTable', 'jobsRef')
 
 
         }
@@ -697,12 +697,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _enggListPageChange(pageNumber) {
             console.log('_pageChanged', pageNumber);
-            this.fetchObjects(pageNumber, "", this.engineers, 'engineers', 'enggListTable', 'enggRef');
+            this.fetchObjectsForTable(pageNumber, "", this.engineers, 'engineers', 'enggListTable', 'enggRef');
         }
 
         _stausJobListPageChange() {
             console.log('_pageChanged', this.stausJobListPage);
-            this.fetchObjects(this.stausJobListPage, {property: 'status', value: this.selectedStatus}, this.statusJobs, 'jobs', 'statusJobListTable', 'statusJobsRef',
+            this.fetchObjectsForTable(this.stausJobListPage, {property: 'status', value: this.selectedStatus}, this.statusJobs, 'jobs', 'statusJobListTable', 'statusJobsRef',
                 ()=>{
                     console.log('Callback fired');
                     this.set('isJobListLoading', false);
@@ -711,10 +711,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _jobListPageChange(pageNumber) {
             console.log('_pageChanged', pageNumber);
-            this.fetchObjects(pageNumber, "", this.jobs, 'jobs', 'jobListTable', 'jobsRef');
+            this.fetchObjectsForTable(pageNumber, "", this.jobs, 'jobs', 'jobListTable', 'jobsRef', null, function(jobsArray){
+                console.log("jobsArray", jobsArray);
+                jobsArray.sort((a, b)=>{
+                    console.log(a,b); 
+                    return ((-1*a.createdTime)>(-1*b.createdTime));
+                });
+
+                jobsArray.forEach((job)=>{
+                    var daysSinceStarted = parseInt(
+                        (moment().toDate().getTime() - 
+                            moment(-1*job.createdTime*1000).toDate().getTime())/(24*60*60*1000)
+                        );
+                    job.message = {
+                        customerName: job.customer.name,
+                        warningMessage: daysSinceStarted + " days since job started"
+                    }; 
+                });
+
+                console.log('processed array', jobsArray);
+                
+            });
         }
 
-        fetchObjects(pageNumber, querry, mainArray, tableName, tableId, oldRefName, callback) {
+        fetchObjectsForTable(pageNumber, querry, mainArray, tableName, tableId, oldRefName, callback, processResponse) {
 
             if (this[oldRefName]) {
                 this[oldRefName].off();
@@ -747,6 +767,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
                 });
+
+                if(processResponse){
+                    processResponse(mainArray);
+                }
 
 
                 console.log("list", tableName, mainArray);
