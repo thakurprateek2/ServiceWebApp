@@ -711,7 +711,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _jobListPageChange(pageNumber) {
             console.log('_pageChanged', pageNumber);
-            this.fetchObjectsForTable(pageNumber, "", this.jobs, 'jobs', 'jobListTable', 'jobsRef', null, function(jobsArray){
+            this.fetchObjectsForTable(pageNumber, {"property": "ongoing", "value": true}, this.jobs, 'jobs', 'jobListTable', 'jobsRef', null, function(jobsArray){
                 console.log("jobsArray", jobsArray);
                 jobsArray.sort((a, b)=>{
                     console.log(a,b); 
@@ -744,7 +744,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             var ref = firebase.database().ref('/' + tableName + '/');
             var rootRef = firebase.database();
-            if (querry && querry.value && querry.value != "") {
+            if (querry && querry.value != undefined && querry.value != "") {
                 //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
 
                 ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
