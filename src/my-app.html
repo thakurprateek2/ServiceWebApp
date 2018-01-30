@@ -35,6 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-view-login.html">
 <link rel="lazy-import" href="engineers-masters.html">
 <link rel="lazy-import" href="customers-masters.html">
+<link rel="lazy-import" href="job-list.html">
 
 
 
@@ -132,6 +133,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="my-view1" href="my-view1">Dashboard</a>
+
+          <template is="dom-if" if="{{accessRights.masters}}">
+          <a name="job-list" href="job-list">Jobs</a>
+        </template>
         <template is="dom-if" if="{{accessRights.masters}}">
           <a name="my-view2" href="my-view2">Masters</a>
         </template>
@@ -172,7 +177,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-view2 name="my-view2"></my-view2>
           <my-view3 name="my-view3"></my-view3>
           <engineers-masters name="engineers-masters"></engineers-masters>
-          <customers-masters name="customers-masters"></customers-masters>          
+          <customers-masters name="customers-masters"></customers-masters>
+          <job-list name="job-list"></job-list>          
           <my-view404 name="my-view404"></my-view404>
           <my-view-login name="my-view-login"></my-view-login>
 

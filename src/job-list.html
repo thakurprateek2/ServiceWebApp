@@ -1,0 +1,353 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-search.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+
+<link rel="import" href="shared-styles.html">
+<dom-module id="job-list">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+
+            padding: 10px;
+        }
+
+        paper-checkbox {
+            margin-right: 20px;
+            padding: 10px;
+        }
+
+        .flex-horizontal-with-ratios {
+            @apply --layout-horizontal;
+        }
+
+        .flexchild {
+            @apply --layout-flex;
+            overflow-y: scroll;
+        }
+
+        .flex2child {
+            @apply --layout-flex-2;
+        }
+
+        .flex3child {
+            @apply --layout-flex-3;
+        }
+
+        .flex6child {
+            @apply --layout-flex-6;
+        }
+        .list-container {
+          position: fixed;
+          width: 100%;
+          /* overflow: hidden; */
+          height: 80%;
+        }
+
+        paper-fab{
+          z-index: 1;
+        }
+        </style>
+
+        <div class="container flex2child flex-horizontal-with-ratios">
+                <div id="job-list" style="overflow: auto;" class="flexchild card">
+                    <div>Jobs By Status
+                        <paper-dropdown-menu id="pdMenu" style="float: right" label="Job Status">
+  <paper-listbox id="pListBox" slot="dropdown-content" selected="1" on-selected-item-changed="onJobStatusSelect">
+    <template is="dom-repeat" items="{{allStatus}}" as="jobStatus">
+        <paper-item>{{jobStatus}}</paper-item>
+    </template>
+    
+  </paper-listbox>
+</paper-dropdown-menu></div>
+                    <paper-datatable-api on-tap-tr="onJobTableRowClick" id="allJobListTable" page="{{jobListPage}}" on-sort="_handleSortJobList" on-filter="_handleFilterJobList" paginate on-selection-changed="_handleSelectionChanged">
+                        <!-- <paper-datatable-api-column header="Date" property="createdTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Status" property="status" hideable>
+                            <template>
+                                <span>[[value]]</span>
+                            </template>
+                        </paper-datatable-api-column> -->
+                        <paper-datatable-api-column header="Customer Name" property="message" filter>
+                            <template>
+                                <span>[[value.customerName]]</span><br>  
+                                <span style="color: #F44336;">[[value.warningMessage]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
+                            <template>
+                                <span>[[value.first_name]]</span>
+                                <span>[[value.last_name]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                        <paper-datatable-api-column header="Updated" property="updatedTime" hideable>
+                            <template>
+                                <span>[[getDateFromTime(value)]]</span>
+                            </template>
+                        </paper-datatable-api-column>
+                    </paper-datatable-api>
+                    <!-- <iron-list scroll-target="job-list">
+                        <div>
+                            <template is="dom-repeat" items="{{jobs}}" as="job">
+                                <paper-item label="{{job.customer.name}}" obj="{{job}}" on-tap="showJob">
+                                    <paper-item-body two-line>
+                                        <div><b>{{job.customer.name}}</b></div>
+                                        <div secondary>{{job.engineer.first_name}} {{job.engineer.last_name}}</div>
+                                        <div secondary>{{job.machine.name}}</div>
+                                    </paper-item-body>
+                                </paper-item>
+                            </template>
+                        </div>
+                    </iron-list> -->
+                </div>
+            </div>
+
+        <paper-fab-speed-dial id="addMenu" with-backdrop>
+            <paper-fab-speed-dial-action on-tap="importEngineers" icon="icons:dns">Import</paper-fab-speed-dial-action>
+            <paper-fab-speed-dial-action on-tap="addCustomer" icon="icons:account-circle">Add Engineer</paper-fab-speed-dial-action>
+        </paper-fab-speed-dial>
+
+        <!-- <div class="circle">3</div>
+      <h1>View Three</h1>
+      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
+      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p> -->
+    </template>
+    <script>
+    class JobList extends Polymer.Element {
+        static get is() { return 'job-list'; }
+        static get properties() {
+            return {
+                engineers: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                jobs: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                jobListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: undefined,
+                    observer: '_jobListPageChange',
+
+                },
+
+                analytics: {
+                    type: Object,
+                    reflectToAttribute: true
+
+                },
+
+                selectedStatusIndex: {
+                    type: Number,
+                    value: 1,
+                    reflectToAttribute: true
+                },
+
+                allStatus: {
+                    type: Array,
+                    value: ["In Progress", "On Hold", "Travelling To", "Open", "Closed"],
+                    reflectToAttribute: true
+                }
+            }
+        }
+
+        connectedCallback() {
+            super.connectedCallback();
+            this.loadData();
+        }
+
+        importEngineers(e) {
+            this.$.addMenu.close();
+            this.$.addNewProduct.open();
+        }
+
+        onJobStatusSelect(e){
+            var dropDownMenu = this.shadowRoot.querySelector('#pdMenu');
+            var listBox = this.shadowRoot.querySelector('#pListBox');
+
+            if(!(this.selectedStatusIndex == listBox.selected)){
+                this.set('selectedStatusIndex', listBox.selected);
+                console.log('onJobStatusSelect', this.selectedStatusIndex);
+                this._jobListPageChange(this.jobListPage);
+            }
+            
+
+        }
+
+        _jobListPageChange(pageNumber) {
+            console.log('_pageChanged', pageNumber);
+            this.fetchObjectsForTable(pageNumber, {property: "status", value: this.allStatus[this.selectedStatusIndex]}, this.jobs, 'jobs', 'allJobListTable', 'jobsRef', null, function(jobsArray){
+                console.log("jobsArray", jobsArray);
+                jobsArray.sort((a, b)=>{
+                    console.log(a,b); 
+                    return ((-1*a.createdTime)>(-1*b.createdTime));
+                });
+
+                jobsArray.forEach((job)=>{
+                    var daysSinceStarted = parseInt(
+                        (moment().toDate().getTime() - 
+                            moment(-1*job.createdTime*1000).toDate().getTime())/(24*60*60*1000)
+                        );
+                    job.message = {
+                        customerName: job.customer.name,
+                        warningMessage: daysSinceStarted + " days since job started"
+                    }; 
+                });
+
+                console.log('processed array', jobsArray);
+                
+            }, this.analytics.total);
+        }
+
+        fetchObjectsForTable(pageNumber, querry, mainArray, tableName, tableId, oldRefName, callback, processResponse, totalPages) {
+
+            if (this[oldRefName]) {
+                this[oldRefName].off();
+                console.log("Discarding old ref", oldRefName);
+
+            }
+
+            var ref = firebase.database().ref('/' + tableName + '/');
+            var rootRef = firebase.database();
+            if (querry && querry.value != undefined && querry.value != "") {
+                //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
+
+                ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
+            }
+
+            this[oldRefName] = ref;
+
+
+            this[oldRefName].on('value', (snap) => {
+
+                mainArray = [];
+
+                snap.forEach((childSnapshot) => {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    childData.id = childKey;
+
+                    mainArray.push(childSnapshot.val());
+
+
+
+                });
+
+                if(processResponse){
+                    processResponse(mainArray);
+                }
+
+
+                console.log("list", tableName, mainArray);
+                var pageSize = 8;
+                this.setUpPage(mainArray, tableId, pageSize, pageNumber, totalPages);
+
+                if(callback){
+                    callback();
+                }
+
+
+
+
+            });
+
+        }
+
+
+        setUpPage(objectArray, tableId, pageSize, pageNumber, totalPages) {
+
+            var dataTable = this.shadowRoot.querySelector('#' + tableId);
+            var startIndex = pageNumber * pageSize;
+            var endIndex = startIndex + pageSize;
+            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+            var objectsOnPage = objectArray.slice(startIndex, endIndex);
+            dataTable.set('data', objectsOnPage);
+            dataTable.set('availableSize', [pageSize]);
+            dataTable.set('size', pageSize);
+            dataTable.set('totalPages', totalPages != undefined ? totalPages : objectArray.length / pageSize);
+            // dataTable.set('page', 0);
+            dataTable.set('totalElements', objectArray.length);
+
+        }
+
+        gotExcelFile() {
+          console.log("gotExcelFile");
+            var excelFileInput = this.$.excelFileInput;
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+              /* read workbook */
+              var bstr = e.target.result;
+              window.workbook = XLSX.read(bstr, {type:'binary'});
+              var engineers = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets['Engineer Details ']);
+              console.log('engineers', engineers);
+
+              /* DO SOMETHING WITH workbook HERE */
+            };
+
+            reader.readAsBinaryString(this.$.excelFileInput.inputElement.inputElement.files[0]);
+
+        }
+
+        loadData() {
+
+
+            firebase.database().ref('/analytics/')
+                .on('value', (snap) => {
+                    this.set('analytics', snap.val());
+                    if(this.jobListPage === undefined){
+                        this.set('jobListPage', 0);
+                    }
+
+                });
+        }
+
+        onAccessChanged(e) {
+            console.log("onAccessChanged", e);
+            setTimeout(() => {
+                var updated = e.model.__data.engineer;
+                console.log("updated", updated);
+
+                firebase.database().ref('/engineers/' + updated.id).set(updated).then(function(snapshot) {
+                    console.log("After Update", snapshot);
+                }, 0);
+
+            })
+        }
+
+    }
+
+    window.customElements.define(JobList.is, JobList);
+    </script>
+</dom-module>
