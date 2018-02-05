@@ -226,8 +226,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
                             <template>
-                                <span>[[value.first_name]]</span>
-                                <span>[[value.last_name]]</span>
+                                <span>[[value.name]]</span>
                             </template>
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Updated" property="updatedTime" hideable>
@@ -318,9 +317,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-dropdown-menu label="Select Engineer" on-selected-item-changed="engineerSelected">
                             <paper-listbox slot="dropdown-content">
                                 <template is="dom-repeat" items="{{engineers}}" as="engg">
-                                    <paper-item label="{{engg.first_name}} {{engg.last_name}}" obj="{{engg}}">
+                                    <paper-item label="{{engg.name}}" obj="{{engg}}">
                                         <paper-item-body two-line>
-                                            <div>{{engg.first_name}} {{engg.last_name}}</div>
+                                            <div>{{engg.name}}</div>
                                             <div secondary>{{engg.email}}</div>
                                         </paper-item-body>
                                     </paper-item>
@@ -401,16 +400,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="flexchild card">
                         <div>Engineers List</div>
                         <paper-datatable-api id="enggListTable" page="{{enggListPage}}" on-sort="_handleSortEnggList" on-filter="_handleFilterEnggList" paginate on-selection-changed="_handleSelectionChanged">
-                            <paper-datatable-api-column header="First Name" property="first_name" filter>
+                            <paper-datatable-api-column header="First Name" property="name" filter>
                                 <template>
                                     <span>[[value]]</span>
                                 </template>
                             </paper-datatable-api-column>
-                            <paper-datatable-api-column header="Last Name" property="last_name" filter>
-                                <template>
-                                    <span>[[value]]</span>
-                                </template>
-                            </paper-datatable-api-column>
+                            
                             <paper-datatable-api-column header="" property="email" filter>
                                 <template>
                                     <span>[[value]]</span>
@@ -443,8 +438,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
                             <template>
-                                <span>[[value.first_name]]</span>
-                                <span>[[value.last_name]]</span>
+                                <span>[[value.name]]</span>
                             </template>
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Updated" property="updatedTime" hideable>

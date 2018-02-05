@@ -1,0 +1,182 @@
+<script>
+  ExcelImport = function(superClass) {
+    return class extends superClass {
+      // Code that you want common to elements.
+      // If you're going to override a lifecycle method, remember that a) you
+      // might need to call super but b) it might not exist
+
+      static get properties() {
+            return {
+               
+
+                importedElements: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                elementListPage: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 0,
+                    observer: '_importElementListPageChange'
+                },
+
+                importListPageSize: {
+                    type: Number,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 3
+                },
+
+                tableName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: "engineers2"
+                }
+            }
+        }
+
+      connectedCallback() {
+        if (super.connectedCallback) {
+          super.connectedCallback();
+        }
+        console.log('Behaviour connectedCallback');
+        /* ... */
+      }
+
+      _importElementListPageChange(pageNumber) {
+            this.setUpPage(this.importedElements, this.getElementTableId(), this.importListPageSize, pageNumber);
+        }
+
+      uploadAll() {
+            this.craeteAllElements();
+      }
+
+      craeteAllElements(startIndex) {
+            if (!startIndex) {
+                startIndex = 0
+            }
+
+            if (startIndex >= this.importedElements.length) {
+                return;
+            }
+
+            var element = this.importedElements[startIndex];
+
+            this.createElement(element, () => {
+                console.log('Engineer Created ', startIndex);
+                startIndex++;
+                this.craeteAllElements(startIndex);
+            });
+
+        }
+
+        createElement(element, callback) {
+            this.checkElementExists(element, (exists) => {
+
+                if (exists) {
+                    element.uploadStatus = "Already Exists"
+                } else {
+                    this.createNewElement(element, (result) => {
+                        element.uploadStatus = "Created"
+                    });
+                }
+
+                this.setUpPage(this.importedElements, this.getElementTableId(), this.importListPageSize, this.elementListPage);
+
+
+                callback();
+
+
+            });
+
+        }
+
+        checkElementExists(element, callback) {
+           super.checkElementExists(element, callback)
+        }
+
+        createNewElement(element, callback) {
+           super.createNewElement(element, callback)
+        }
+
+        gotExcelFile() {
+
+            var self = this;
+            console.log("gotExcelFile");
+            var excelFileInput = this.$.excelFileInput;
+
+            var reader = new FileReader();
+
+            reader.onload = (e)=> {
+                /* read workbook */
+                var bstr = e.target.result;
+                window.workbook = XLSX.read(bstr, { type: 'binary' });
+                var elements = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets['Engineer Details ']);
+
+                this.$[this.getImportDialogId()].close();
+
+                var transformedMap = this.getTransformationMap();
+
+                var transformedElements = this.mapFieldsToObject(elements, transformedMap);
+                console.log('engineers', transformedElements);
+                this.set('importedElements', transformedElements);
+                this.setUpPage(this.importedElements, this.getElementTableId(), this.importListPageSize, 0);
+                this.$[this.getImportDialogId()].open();
+
+                /* DO SOMETHING WITH workbook HERE */
+            };
+
+            reader.readAsBinaryString(this.$.excelFileInput.inputElement.inputElement.files[0]);
+
+        }
+
+        mapFieldsToObject(objectArray, fieldMap) {
+
+            var transformedArray = [];
+
+            objectArray.forEach((obj) => {
+                var transformedObj = {};
+
+                for (var key in obj) {
+                    if (fieldMap[key]) {
+                        transformedObj[fieldMap[key]] = obj[key];
+                    }
+                }
+
+                transformedArray.push(transformedObj);
+            });
+
+            return transformedArray;
+
+
+        }
+
+        setUpPage(objectArray, tableId, pageSize, pageNumber) {
+
+            var dataTable = this.shadowRoot.querySelector('#' + tableId);
+            if (!dataTable || !dataTable.set) {
+                console.warn('Table element or its polymer element not found!');
+                return;
+            }
+            var startIndex = pageNumber * pageSize;
+            var endIndex = startIndex + pageSize;
+            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+            var objectsOnPage = objectArray.slice(startIndex, endIndex);
+            dataTable.set('data', objectsOnPage);
+            dataTable.set('availableSize', [pageSize]);
+            dataTable.set('size', pageSize);
+            dataTable.set('totalPages', objectArray.length / pageSize);
+            // dataTable.set('page', 0);
+            dataTable.set('totalElements', objectArray.length);
+
+        }
+
+    }
+  }
+</script>
