@@ -36,6 +36,13 @@
                     reflectToAttribute: true,
                     notify: true,
                     value: "engineers2"
+                },
+
+                sheetName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 'Engineer Details '
                 }
             }
         }
@@ -104,11 +111,12 @@
            super.createNewElement(element, callback)
         }
 
-        gotExcelFile() {
+        gotExcelFile(changeEvent) {
+            console.log('changeEvent', changeEvent);
 
             var self = this;
             console.log("gotExcelFile");
-            var excelFileInput = this.$.excelFileInput;
+            var excelFileInput = changeEvent.detail.sourceEvent.srcElement;
 
             var reader = new FileReader();
 
@@ -116,7 +124,7 @@
                 /* read workbook */
                 var bstr = e.target.result;
                 window.workbook = XLSX.read(bstr, { type: 'binary' });
-                var elements = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets['Engineer Details ']);
+                var elements = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets[this.sheetName]);
 
                 this.$[this.getImportDialogId()].close();
 
@@ -131,7 +139,7 @@
                 /* DO SOMETHING WITH workbook HERE */
             };
 
-            reader.readAsBinaryString(this.$.excelFileInput.inputElement.inputElement.files[0]);
+            reader.readAsBinaryString(excelFileInput.files[0]);
 
         }
 

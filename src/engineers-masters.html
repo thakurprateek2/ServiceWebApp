@@ -14,7 +14,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="./behaviours/excel-import.html">
 <link rel="import" href="shared-styles.html">
 <dom-module id="engineers-masters">
     <template>
@@ -92,6 +91,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <template is="dom-if" if="{{selectedTeam.id}}">
                     <span>Team Size {{engineers.length}}</span>
                     <paper-button on-tap="openAddEngineerModal" raised noink>Add Engineer</paper-button>
+                    <span>Admin: <b>{{selectedTeam.admin.name}}</b></span>
+                    <span>Phone: <b>{{selectedTeam.admin.mobile}}</b></span>
+                    
                 </template>
             </div>
         </div>
@@ -172,7 +174,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
             <br>
             <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
-            <paper-datatable-api id="importEnggListTable" page="{{enggListPage}}" on-filter="_handleEnggListFilter" paginate on-selection-changed="_handleEnggListChanged">
+            <paper-datatable-api id="importEnggListTable" page="{{elementListPage}}" on-filter="_handleEnggListFilter" paginate on-selection-changed="_handleEnggListChanged">
                 <paper-datatable-api-column header="Name" property="name" hideable>
                     <template>
                         <span>[[value]]</span>
@@ -286,6 +288,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.addTeamModal.open();
         }
 
+        //Excel behaviour implemented methods start
 
         checkElementExists(element, callback) {
             element.uploadStatus = "Checking"
@@ -347,6 +350,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         getElementTableId() {
             return 'importEnggListTable';
         }
+        //Excel behaviour implemented methods end
 
 
         _onSelectedTeamChange(){
