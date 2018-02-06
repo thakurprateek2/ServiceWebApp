@@ -22,9 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item-body.html">
-<link rel="import" href="../bower_components/google-map/google-map.html">
-<link rel="import" href="../bower_components/google-map/google-map-search.html">
-<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
@@ -297,7 +295,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <google-map-search map="[[map]]" query="{{companyAddress}}" results="{{results}}">
                         </google-map-search>
 
-                        <google-map fit-to-markers id="customerMap">
+                        <google-map api-key="AIzaSyCvmAMaKwvlzAzBHJfy5pmTTv9_aZ1Akes" fit-to-markers id="customerMap">
                           <google-map-marker latitude="37.78" longitude="-122.4" draggable="true"></google-map-marker>
                           <template is="dom-if" if="{{selectedCustomer}}">
 
