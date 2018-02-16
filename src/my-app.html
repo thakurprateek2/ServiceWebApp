@@ -39,6 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="engineers-masters.html">
 <link rel="lazy-import" href="customers-masters.html">
 <link rel="lazy-import" href="job-list.html">
+<link rel="lazy-import" href="attendance-report.html">
 
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-map/google-map-search.html">
@@ -168,6 +169,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a name="my-view3" href="my-view3">User Management</a>
         </template>
 
+        <template is="dom-if" if="{{accessRights.admin}}">
+          <a name="attendance-report" href="attendance-report">Attendance</a>
+        </template>
+
 
 
         </iron-selector>
@@ -185,7 +190,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-view3 name="my-view3"></my-view3>
           <engineers-masters name="engineers-masters"></engineers-masters>
           <customers-masters name="customers-masters"></customers-masters>
-          <job-list name="job-list"></job-list>          
+          <job-list name="job-list"></job-list>
+          <attendance-report name="attendance-report"></attendance-report>
+                    
           <my-view404 name="my-view404"></my-view404>
           <my-view-login name="my-view-login"></my-view-login>
 

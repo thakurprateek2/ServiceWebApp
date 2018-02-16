@@ -1,0 +1,443 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-search.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+
+<link rel="import" href="shared-styles.html">
+<dom-module id="attendance-report">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+
+            padding: 10px;
+        }
+
+        paper-checkbox {
+            margin-right: 20px;
+            padding: 10px;
+        }
+
+        .flex-horizontal-with-ratios {
+            @apply --layout-horizontal;
+        }
+
+        .flexchild {
+            @apply --layout-flex;
+            overflow-y: scroll;
+        }
+
+        .flex2child {
+            @apply --layout-flex-2;
+        }
+
+        .flex3child {
+            @apply --layout-flex-3;
+        }
+
+        .flex6child {
+            @apply --layout-flex-6;
+        }
+        .list-container {
+          position: fixed;
+          width: 100%;
+          /* overflow: hidden; */
+          height: 80%;
+        }
+
+        paper-fab{
+          z-index: 1;
+        }
+
+        .dialog-form-input-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .dialog-form-input-row paper-input {
+            flex-grow: 1;
+            margin-right: 50px;
+        }
+
+        .dialog-form-input-row paper-input:last-child {
+            margin-right: 0px;
+        }
+
+        </style>
+
+
+<paper-dialog id="addNewCustomerModal">
+    <h2>Add New Customer</h2>
+    <paper-dialog-scrollable>
+        <div class="container">
+            <paper-input value="{{newCust.name}}" label="Name"></paper-input>
+            <paper-input value="{{newCust.email}}" label="Email"></paper-input>
+            <paper-input value="{{newCust.address}}" label="Comapny Address"></paper-input>
+            <div class="dialog-form-input-row">
+                <paper-input value="{{newCust.phone}}" label="Phone"></paper-input>
+                <paper-input value="{{newCust.pin}}" label="Pin Code" type="number"></paper-input>
+            </div>
+        </div>
+    </paper-dialog-scrollable>
+    <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="createNewCustomer" dialog-confirm autofocus>OK</paper-button>
+    </div>
+</paper-dialog>
+
+<paper-dialog id="importCustomerModal" style="width:95%">
+    <div>
+        <h2 style="float:left">Import Excel</h2>
+        <paper-button on-tap="uploadAll" raised noink style="float:right">Upload</paper-button>
+    </div>
+    <br>
+    <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
+    <paper-datatable-api id="importCustomerListTable" page="{{elementListPage}}" paginate on-selection-changed="_handleEnggListChanged">
+        <paper-datatable-api-column header="Name" property="name" hideable>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+        <paper-datatable-api-column header="Phone Number" property="phone" hideable>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+        <paper-datatable-api-column header="Alt Number" property="alternatePhone" hideable>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+        <paper-datatable-api-column header="Address" property="address" filter>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+        <paper-datatable-api-column header="Email" property="email" hideable>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+        <paper-datatable-api-column header="Upload Status" property="uploadStatus" hideable>
+            <template>
+                <span>[[value]]</span>
+            </template>
+        </paper-datatable-api-column>
+    </paper-datatable-api>
+    <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="createNewProduct" dialog-confirm autofocus>OK</paper-button>
+    </div>
+</paper-dialog>
+
+         
+        <div class="list-container flex-horizontal-with-ratios">
+            <div class="flexchild">
+                <iron-list scroll-target="job-list">
+                    <div id="job-list">
+                        <template is="dom-repeat" items="{{engineers}}" as="engineer">
+                            <paper-item on-tap="getEngineerAttendance" class="card" label="{{engineer.name}}" obj="{{engineer}}" on-tap="showJob">
+                                <paper-item-body two-line>
+                                    <div><b>{{engineer.name}}</b></div>
+                                    <div secondary>{{engineer.email}}</div>
+                                </paper-item-body>
+                            </paper-item>
+                        </template>
+                    </div>
+                </iron-list>
+            </div>
+            <div class="flex3child">
+                <google-map api-key="AIzaSyCvmAMaKwvlzAzBHJfy5pmTTv9_aZ1Akes" fit-to-markers id="customerMap">
+                          
+                          
+                        </google-map>
+            </div>
+        </div>
+
+        <paper-fab-speed-dial id="addMenu" with-backdrop>
+            <paper-fab-speed-dial-action on-tap="openImportModal" icon="icons:dns">Import</paper-fab-speed-dial-action>
+            <paper-fab-speed-dial-action on-tap="openAddCustomerModal" icon="icons:account-circle">Add Customer</paper-fab-speed-dial-action>
+        </paper-fab-speed-dial>
+
+         <paper-dialog id="addNewProduct">
+            <h2>Import Excel</h2>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
+                    
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewProduct" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <!-- <div class="circle">3</div>
+      <h1>View Three</h1>
+      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
+      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p> -->
+    </template>
+    <script>
+    class AttendanceReport extends ExcelImport(Polymer.Element) {
+        static get is() { return 'attendance-report'; }
+        static get properties() {
+            return {
+                engineers: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                //Overwritten properties from excel behavious start
+                tableName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 'customers'
+                },
+
+                sheetName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: 'data'
+                },
+
+                newCust: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    value: {}
+
+                },
+
+                //Overwritten properties from excel behavious end
+                
+            }
+        }
+
+        connectedCallback() {
+            super.connectedCallback();
+            this.loadData();
+        }
+
+        openImportModal(e) {
+            //TODO maybe uncomment below
+            // this.$.addMenu.close();
+            // this.$.importCustomerModal.open();
+            this.engineers.forEach((e)=>{
+
+                var newPostKey = firebase.database().ref().child('attendance').push().key;
+                var updates = {};
+                var newElement = {};
+                updates['/'+ 'attendance' + '/' + newPostKey] = newElement;
+
+                newElement.id = e.id;
+                newElement.name = e.name;
+                // newElement.time = firebase.database.ServerValue.TIMESTAMP;
+                newElement.type = 'IN';
+
+                newElement.time = new Date().getTime() - 86400000 * Math.floor((Math.random() * 10) + 1);
+
+                newElement.id_time = newElement.id + '_' + newElement.time;
+
+                firebase.database().ref().update(updates);
+            });
+            
+        
+        }
+
+        openAddCustomerModal(){
+
+            firebase.database().ref('/attendance/')
+                .once('value', (snap) => {
+                    // this.set('engineers', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        // childData.id = childKey;
+                        // this.push('engineers', childData);
+                        console.log('attendance', childKey, childData);
+                    });
+                });
+
+            // this.$.addMenu.close();            
+            // this.$.addNewCustomerModal.open();            
+        }
+
+
+        getEngineerAttendance(e){
+            var engg = e.model.__data.engineer;
+            console.log('clicked event', e.model.__data.engineer);
+            var startTime = moment().subtract('day', 1).startOf('day').toDate().getTime();
+            var endTime = moment().subtract('day', 1).endOf('day').toDate().getTime();
+            firebase.database().ref('/attendance/').orderByChild("time")
+            .startAt(startTime)
+            .endAt(endTime)
+                .once('value', (snap) => {
+                    // this.set('engineers', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        var attendanceDate = new Date(childData.time);
+                        console.log('time of attendance', attendanceDate);
+                        // ...
+                        // childData.id = childKey;
+                        // this.push('engineers', childData);
+                        console.log('today attendance', childKey, childData);
+                    });
+                });
+
+                firebase.database().ref('/attendance/').orderByChild("id_time")
+            .startAt(engg.id + '_' +  startTime)
+            .endAt(engg.id + '_' + endTime)
+                .once('value', (snap) => {
+                    // this.set('engineers', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        var attendanceDate = new Date(childData.time);
+                        console.log('engg time of attendance', attendanceDate);
+                        // ...
+                        // childData.id = childKey;
+                        // this.push('engineers', childData);
+                        console.log('engg attendance', childKey, childData);
+                    });
+                });
+        }
+
+
+        createNewCustomer(){
+            this.createNewElement(this.newCust, ()=>{
+                console.log("Customer created");
+            })    
+        }
+
+        //Excel behaviour implemented methods start
+
+        checkElementExists(element, callback) {
+            element.uploadStatus = "Checking"
+            this.setUpPage(this.importedElements, 'importCustomerListTable', this.importListPageSize, this.elementListPage);
+            firebase.database().ref().child(this.tableName)
+                .orderByChild("phone").equalTo(element.phone)
+                .once('value', (snap) => {
+                    console.log("Result", snap, snap.key, snap.val());
+                    callback(snap.exists());
+                });
+            // setTimeout(()=>{callback(true)}, 1000)
+        }
+
+        createNewElement(element, callback) {
+            var newElement = {
+                "name": element.name,
+                "email": element.email,
+                "phone": element.phone,
+                "address": element.address
+            }
+
+            if(element.alternatePhone){
+                newElement.alternatePhone = element.alternatePhone; 
+            }
+
+            var newPostKey = firebase.database().ref().child(this.tableName).push().key;
+            var updates = {};
+            updates['/'+ this.tableName + '/' + newPostKey] = newElement;
+
+            newElement.id = newPostKey;
+
+            firebase.database().ref().update(updates);
+            newElement = {};
+            callback();
+
+        }
+        
+        getTransformationMap() {
+            return {
+                "Alternative Phone": "alternatePhone",
+                "Email ID": "email",
+                "Phone Number": "phone",
+                "Name": "name",
+                "Address": "address",
+                "pin" : "Pin Code"
+            }
+        }
+
+        getImportDialogId() {
+            return 'importCustomerModal';
+        }
+
+        getElementTableId() {
+            return 'importCustomerListTable';
+        }
+        //Excel behaviour implemented methods end
+
+        // gotExcelFile() {
+        //   console.log("gotExcelFile");
+        //     var excelFileInput = this.$.excelFileInput;
+
+        //     var reader = new FileReader();
+
+        //     reader.onload = function (e) {
+        //       /* read workbook */
+        //       var bstr = e.target.result;
+        //       window.workbook = XLSX.read(bstr, {type:'binary'});
+        //       var engineers = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets['Engineer Details ']);
+        //       console.log('engineers', engineers);
+
+        //       /* DO SOMETHING WITH workbook HERE */
+        //     };
+
+        //     reader.readAsBinaryString(this.$.excelFileInput.inputElement.inputElement.files[0]);
+
+        // }
+
+        loadData() {
+
+
+            firebase.database().ref('/engineers/')
+                .on('value', (snap) => {
+                    this.set('engineers', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        childData.id = childKey;
+                        this.push('engineers', childData);
+                    });
+                });
+        }
+
+        onAccessChanged(e) {
+            console.log("onAccessChanged", e);
+            setTimeout(() => {
+                var updated = e.model.__data.engineer;
+                console.log("updated", updated);
+
+                firebase.database().ref('/engineers/' + updated.id).set(updated).then(function(snapshot) {
+                    console.log("After Update", snapshot);
+                }, 0);
+
+            })
+        }
+
+    }
+
+    window.customElements.define(AttendanceReport.is, AttendanceReport);
+    </script>
+</dom-module>
