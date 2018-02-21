@@ -13,11 +13,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-map/google-map-search.html">
 <link rel="import" href="../bower_components/google-map/google-map-marker.html">
-
+<link rel="import" href="../bower_components/datetime-picker/date-picker.html">
 <link rel="import" href="shared-styles.html">
 <dom-module id="attendance-report">
     <template>
@@ -39,7 +38,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         .flexchild {
             @apply --layout-flex;
-            overflow-y: scroll;
         }
 
         .flex2child {
@@ -53,15 +51,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .flex6child {
             @apply --layout-flex-6;
         }
-        .list-container {
-          position: fixed;
-          width: 100%;
-          /* overflow: hidden; */
-          height: 80%;
+
+        .attendance-list-container {
+            position: fixed;
+            margin: auto;
+            width: 98%;
+            /* overflow: hidden; */
+            height: 80%;
         }
 
-        paper-fab{
-          z-index: 1;
+        .vertical-scroll {
+            overflow-y: scroll;
+        }
+
+        #job-list:last-child {
+            margin-bottom: 100px;
+        }
+
+        paper-fab {
+            z-index: 1;
         }
 
         .dialog-form-input-row {
@@ -77,109 +85,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .dialog-form-input-row paper-input:last-child {
             margin-right: 0px;
         }
+        /* paper-button.custom:hover {
+            background-color: var(--paper-indigo-100);
+        } */
 
+        paper-button.indigo {
+            background-color: var(--paper-indigo-500);
+            color: white;
+            --paper-button-raised-keyboard-focus: {
+                background-color: var(--paper-pink-a200) !important;
+                color: white !important;
+            }
+            ;
+        }
+
+        .attendance-row-label {
+            color: var(--app-primary-color);
+        }
+
+        .attendance-row-label-in {
+            color: var(--paper-green-500);
+        }
+
+        .attendance-row-label-out {
+            color: var(--paper-red-500);
+        }
+
+        .select-date-container {
+            padding-left: 30px;
+        }
+
+        .select-date-container>paper-button {
+            /* width: 60%; */
+            z-index: 1;
+            padding: 0px;
+        }
         </style>
-
-
-<paper-dialog id="addNewCustomerModal">
-    <h2>Add New Customer</h2>
-    <paper-dialog-scrollable>
-        <div class="container">
-            <paper-input value="{{newCust.name}}" label="Name"></paper-input>
-            <paper-input value="{{newCust.email}}" label="Email"></paper-input>
-            <paper-input value="{{newCust.address}}" label="Comapny Address"></paper-input>
-            <div class="dialog-form-input-row">
-                <paper-input value="{{newCust.phone}}" label="Phone"></paper-input>
-                <paper-input value="{{newCust.pin}}" label="Pin Code" type="number"></paper-input>
+        <div class="flex-horizontal-with-ratios">
+            <div class="flexchild select-date-container">
+                Select Date:
+                <paper-button raised class="custom indigo">
+                    <date-picker confirmed-date="{{attendanceDate}}"></date-picker>
+                </paper-button>
+            </div>
+            <div class="flexchild">
             </div>
         </div>
-    </paper-dialog-scrollable>
-    <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="createNewCustomer" dialog-confirm autofocus>OK</paper-button>
-    </div>
-</paper-dialog>
-
-<paper-dialog id="importCustomerModal" style="width:95%">
-    <div>
-        <h2 style="float:left">Import Excel</h2>
-        <paper-button on-tap="uploadAll" raised noink style="float:right">Upload</paper-button>
-    </div>
-    <br>
-    <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
-    <paper-datatable-api id="importCustomerListTable" page="{{elementListPage}}" paginate on-selection-changed="_handleEnggListChanged">
-        <paper-datatable-api-column header="Name" property="name" hideable>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-        <paper-datatable-api-column header="Phone Number" property="phone" hideable>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-        <paper-datatable-api-column header="Alt Number" property="alternatePhone" hideable>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-        <paper-datatable-api-column header="Address" property="address" filter>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-        <paper-datatable-api-column header="Email" property="email" hideable>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-        <paper-datatable-api-column header="Upload Status" property="uploadStatus" hideable>
-            <template>
-                <span>[[value]]</span>
-            </template>
-        </paper-datatable-api-column>
-    </paper-datatable-api>
-    <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="createNewProduct" dialog-confirm autofocus>OK</paper-button>
-    </div>
-</paper-dialog>
-
-         
-        <div class="list-container flex-horizontal-with-ratios">
-            <div class="flexchild">
+        <div class="attendance-list-container flex-horizontal-with-ratios">
+            <div class="flexchild vertical-scroll">
                 <iron-list scroll-target="job-list">
                     <div id="job-list">
-                        <template is="dom-repeat" items="{{engineers}}" as="engineer">
-                            <paper-item on-tap="getEngineerAttendance" class="card" label="{{engineer.name}}" obj="{{engineer}}" on-tap="showJob">
+                        <template is="dom-repeat" items="{{attendanceList}}" as="enggAttendance">
+                            <paper-item on-tap="getEngineerAttendance" class="card" label="{{enggAttendance.name}}" obj="{{enggAttendance}}" on-tap="showJob">
                                 <paper-item-body two-line>
-                                    <div><b>{{engineer.name}}</b></div>
-                                    <div secondary>{{engineer.email}}</div>
+                                    <div><b>{{enggAttendance.name}}</b></div>
+                                    <div secondary class="flex-horizontal-with-ratios">
+                                        <div class="flexchild">
+                                            <div class="attendance-row-label-in">In</div>
+                                            <div>{{enggAttendance.checkIn.displayTime}}</div>
+                                        </div>
+                                        <div class="flexchild">
+                                            <div class="attendance-row-label-out">Out</div>
+                                            <div>{{enggAttendance.checkOut.displayTime}}</div>
+                                        </div>
+                                        <div class="flexchild">
+                                            <div class="attendance-row-label">Duration</div>
+                                            <div>{{enggAttendance.duration}}</div>
+                                        </div>
+                                    </div>
                                 </paper-item-body>
                             </paper-item>
                         </template>
                     </div>
                 </iron-list>
             </div>
-            <div class="flex3child">
-                <google-map api-key="AIzaSyCvmAMaKwvlzAzBHJfy5pmTTv9_aZ1Akes" fit-to-markers id="customerMap">
-                          
-                          
-                        </google-map>
+            <div class="flexchild">
+                <google-map style="height:400px;" api-key="AIzaSyCvmAMaKwvlzAzBHJfy5pmTTv9_aZ1Akes" fit-to-markers id="customerMap">
+                </google-map>
             </div>
         </div>
-
         <paper-fab-speed-dial id="addMenu" with-backdrop>
             <paper-fab-speed-dial-action on-tap="openImportModal" icon="icons:dns">Import</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="openAddCustomerModal" icon="icons:account-circle">Add Customer</paper-fab-speed-dial-action>
         </paper-fab-speed-dial>
-
-         <paper-dialog id="addNewProduct">
+        <paper-dialog id="addNewProduct">
             <h2>Import Excel</h2>
             <paper-dialog-scrollable>
                 <div class="container">
                     <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
-                    
                 </div>
             </paper-dialog-scrollable>
             <div class="buttons">
@@ -202,6 +195,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     reflectToAttribute: true,
                     notify: true,
                     value: []
+                },
+
+                attendanceList: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+
+                attendanceDate: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: moment().format('YYYY-MM-DD'),
+                    observer: '_onDateSelectChange'
                 },
 
                 //Overwritten properties from excel behavious start
@@ -227,52 +235,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
 
                 //Overwritten properties from excel behavious end
-                
+
             }
         }
 
         connectedCallback() {
             super.connectedCallback();
+            // this.loadData();
+        }
+
+        _onDateSelectChange(newVal, oldVal) {
+            console.log('_onDateSelectChange', newVal, oldVal);
             this.loadData();
+
         }
 
         openImportModal(e) {
             //TODO maybe uncomment below
             // this.$.addMenu.close();
             // this.$.importCustomerModal.open();
-            this.engineers.forEach((e)=>{
+            this.engineers.forEach((e) => {
 
                 var newPostKey = firebase.database().ref().child('attendance').push().key;
                 var updates = {};
                 var newElement = {};
-                updates['/'+ 'attendance' + '/' + newPostKey] = newElement;
+                updates['/' + 'attendance' + '/' + newPostKey] = newElement;
 
-                newElement.id = e.id;
+                newElement.engineerId = e.engineerId;
                 newElement.name = e.name;
                 // newElement.time = firebase.database.ServerValue.TIMESTAMP;
                 newElement.type = 'IN';
 
                 newElement.time = new Date().getTime() - 86400000 * Math.floor((Math.random() * 10) + 1);
 
-                newElement.id_time = newElement.id + '_' + newElement.time;
+                newElement.engineerId_time = newElement.engineerId + '_' + newElement.time;
 
                 firebase.database().ref().update(updates);
             });
-            
-        
+
+
         }
 
-        openAddCustomerModal(){
+        openAddCustomerModal() {
 
             firebase.database().ref('/attendance/')
                 .once('value', (snap) => {
-                    // this.set('engineers', []);
+                    this.set('attendanceList', []);
                     snap.forEach((childSnapshot) => {
                         var childKey = childSnapshot.key;
                         var childData = childSnapshot.val();
                         // ...
                         // childData.id = childKey;
-                        // this.push('engineers', childData);
+                        this.push('attendanceList', childData);
                         console.log('attendance', childKey, childData);
                     });
                 });
@@ -282,14 +296,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
 
-        getEngineerAttendance(e){
+        getEngineerAttendance(e) {
             var engg = e.model.__data.engineer;
             console.log('clicked event', e.model.__data.engineer);
-            var startTime = moment().subtract('day', 1).startOf('day').toDate().getTime();
+            var startTime = moment().subtract('day', 10).startOf('day').toDate().getTime();
             var endTime = moment().subtract('day', 1).endOf('day').toDate().getTime();
             firebase.database().ref('/attendance/').orderByChild("time")
-            .startAt(startTime)
-            .endAt(endTime)
+                .startAt(startTime)
+                .endAt(endTime)
                 .once('value', (snap) => {
                     // this.set('engineers', []);
                     snap.forEach((childSnapshot) => {
@@ -304,9 +318,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     });
                 });
 
-                firebase.database().ref('/attendance/').orderByChild("id_time")
-            .startAt(engg.id + '_' +  startTime)
-            .endAt(engg.id + '_' + endTime)
+            firebase.database().ref('/attendance/').orderByChild("id_time")
+                .startAt(engg.id + '_' + startTime)
+                .endAt(engg.id + '_' + endTime)
                 .once('value', (snap) => {
                     // this.set('engineers', []);
                     snap.forEach((childSnapshot) => {
@@ -323,10 +337,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
 
-        createNewCustomer(){
-            this.createNewElement(this.newCust, ()=>{
+        createNewCustomer() {
+            this.createNewElement(this.newCust, () => {
                 console.log("Customer created");
-            })    
+            })
         }
 
         //Excel behaviour implemented methods start
@@ -351,13 +365,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 "address": element.address
             }
 
-            if(element.alternatePhone){
-                newElement.alternatePhone = element.alternatePhone; 
+            if (element.alternatePhone) {
+                newElement.alternatePhone = element.alternatePhone;
             }
 
             var newPostKey = firebase.database().ref().child(this.tableName).push().key;
             var updates = {};
-            updates['/'+ this.tableName + '/' + newPostKey] = newElement;
+            updates['/' + this.tableName + '/' + newPostKey] = newElement;
 
             newElement.id = newPostKey;
 
@@ -366,7 +380,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             callback();
 
         }
-        
+
         getTransformationMap() {
             return {
                 "Alternative Phone": "alternatePhone",
@@ -374,7 +388,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 "Phone Number": "phone",
                 "Name": "name",
                 "Address": "address",
-                "pin" : "Pin Code"
+                "pin": "Pin Code"
             }
         }
 
@@ -412,6 +426,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             firebase.database().ref('/engineers/')
                 .on('value', (snap) => {
+                    var allEngineersObj = snap.val();
                     this.set('engineers', []);
                     snap.forEach((childSnapshot) => {
                         var childKey = childSnapshot.key;
@@ -420,7 +435,85 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         childData.id = childKey;
                         this.push('engineers', childData);
                     });
+                    this.fetchAttendanceEntries(allEngineersObj);
                 });
+        }
+
+        fetchAttendanceEntries(allEngineersObj) {
+            var startTime = moment(this.attendanceDate, 'YYYY-MM-DD').startOf('day').toDate().getTime();
+            var endTime = moment(this.attendanceDate, 'YYYY-MM-DD').endOf('day').toDate().getTime();
+            firebase.database().ref('/attendance/').orderByChild("time")
+                .startAt(startTime)
+                .endAt(endTime)
+                .once('value', (snap) => {
+                    this.set('attendanceList', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+
+                        this.addAttendanceDeatils(allEngineersObj, childData);
+
+                        console.log('attendance', childKey, childData);
+                    });
+
+                    Object.keys(allEngineersObj).forEach((enggId) => {
+                        this.push('attendanceList', allEngineersObj[enggId].attendance ?
+                            allEngineersObj[enggId].attendance :
+                            {
+                                'name': allEngineersObj[enggId].name,
+                                'checkIn': {
+                                    displayTime: '--:-- -'
+                                },
+                                'checkOut': {
+                                    displayTime: '--:-- -'
+                                },
+                                duration: '---'
+                            });
+                    });
+
+                });
+        }
+
+        addAttendanceDeatils(allEngineersObj, childData) {
+            if (!allEngineersObj[childData.engineerId].attendance) {
+
+                allEngineersObj[childData.engineerId].attendance = {
+                    'name': allEngineersObj[childData.engineerId].name,
+                    'checkIn': {
+                        displayTime: '--:-- -'
+                    },
+                    'checkOut': {
+                        displayTime: '--:-- -'
+                    },
+                    duration: '---'
+                };
+            }
+            // ...
+            // childData.id = childKey;
+            var engginCheckIn = allEngineersObj[childData.engineerId].attendance.checkIn;
+
+            if (!engginCheckIn.time || engginCheckIn.time > childData.time) {
+                allEngineersObj[childData.engineerId].attendance.checkIn = childData;
+                allEngineersObj[childData.engineerId].attendance
+                    .checkIn.displayTime = moment(childData.time).format('h:mm a');
+            }
+
+
+            var engginCheckOut = allEngineersObj[childData.engineerId].attendance.checkOut;
+
+            if (!engginCheckOut.time || engginCheckOut.time < childData.time) {
+                allEngineersObj[childData.engineerId].attendance.checkOut = childData;
+                allEngineersObj[childData.engineerId].attendance
+                    .checkOut.displayTime = moment(childData.time).format('h:mm a');
+            }
+
+            var duration = allEngineersObj[childData.engineerId].attendance.checkOut.time - allEngineersObj[childData.engineerId].attendance.checkIn.time;
+
+            if (duration) {
+                allEngineersObj[childData.engineerId].attendance.duration = Math.round((duration / (1000 * 60 * 60)) * 100) / 100 + ' hours';
+            } else {
+                allEngineersObj[childData.engineerId].attendance.duration = '---';
+            }
         }
 
         onAccessChanged(e) {

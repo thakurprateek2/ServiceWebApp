@@ -64,8 +64,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             margin-left: 24px;
         }
 
-        .modalCard{
+        .modalCard {
             margin: 20px;
+        }
+
+        .row-remove {
+            background: #E6E6E6;
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 3px;
         }
 
         paper-fab {
@@ -93,7 +101,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-button on-tap="openAddEngineerModal" raised noink>Add Engineer</paper-button>
                     <span>Admin: <b>{{selectedTeam.admin.name}}</b></span>
                     <span>Phone: <b>{{selectedTeam.admin.mobile}}</b></span>
-                    
                 </template>
             </div>
         </div>
@@ -104,6 +111,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <template is="dom-repeat" items="{{engineers}}" as="engineer">
                             <paper-item class="card" label="{{engineer.name}}" obj="{{engineer}}" on-tap="showJob">
                                 <paper-item-body two-line>
+                                    <template is="dom-if" if="{{selectedTeam.id}}">
+                                        <div on-tap="onRemoveTap" class="row-remove">
+                                            <iron-icon icon="icons:close"></iron-icon>
+                                        </div>
+                                    </template>
                                     <div><b>{{engineer.name}}</b></div>
                                     <div secondary>{{engineer.email}}</div>
                                 </paper-item-body>
@@ -122,20 +134,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-fab-speed-dial-action on-tap="addCustomer" icon="icons:account-circle">Add Engineer</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="addTeam" icon="icons:account-circle">Add Team</paper-fab-speed-dial-action>
         </paper-fab-speed-dial>
-
+        <paper-dialog id="removeEngineerModal">
+            <h2>Remove {{engineerToRemove.name}} from team {{selectedTeam.name}} ?</h2>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="removeEngineer" dialog-confirm autofocus>Yes</paper-button>
+            </div>
+        </paper-dialog>
         <paper-dialog id="addEngineerModal">
             <h2>Select Engineer to add in {{selectedTeam.name}}</h2>
             <paper-dialog-scrollable>
                 <div class="container">
-                    
-                        <template is="dom-repeat" items="{{engineersToAdd}}" as="engineer">
-                            <paper-item class="card modalCard" label="{{engineer.name}}" obj="{{engineer}}" on-tap="addEngineerToTeam">
-                                <paper-item-body two-line>
-                                    <div><b>{{engineer.name}}</b></div>
-                                    <div secondary>{{engineer.email}}</div>
-                                </paper-item-body>
-                            </paper-item>
-                        </template>
+                    <template is="dom-repeat" items="{{engineersToAdd}}" as="engineer">
+                        <paper-item class="card modalCard" label="{{engineer.name}}" obj="{{engineer}}" on-tap="addEngineerToTeam">
+                            <paper-item-body two-line>
+                                <div><b>{{engineer.name}}</b></div>
+                                <div secondary>{{engineer.email}}</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </template>
                 </div>
             </paper-dialog-scrollable>
             <div class="buttons">
@@ -353,9 +370,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //Excel behaviour implemented methods end
 
 
-        _onSelectedTeamChange(){
+        _onSelectedTeamChange() {
 
-            if(this.enggListRef){
+            if (this.enggListRef) {
                 this.enggListRef.off();
             }
 
@@ -367,48 +384,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.shadowRoot.querySelector("#engineerMap").resize();
 
             this.enggListRef = firebase.database().ref('/engineers/');
-            if(this.selectedTeam.id){
+            if (this.selectedTeam.id) {
                 this.enggListRef = this.enggListRef
-                .orderByChild('teams/' + this.selectedTeam.id)
-                .equalTo(true)
+                    .orderByChild('teams/' + this.selectedTeam.id)
+                    .equalTo(true)
             }
 
             this.enggListRef.on('value', (snap) => {
-                    this.set('engineers', []);
-                    if(this.markers){                        
-                        this.markers.forEach((m)=>{
-                            m.setMap(null);
-                        });
-                    }
-                    this.markers = [];
-                    snap.forEach((childSnapshot) => {
-                        var childKey = childSnapshot.key;
-                        var childData = childSnapshot.val();
-                        // ...
-                        childData.id = childKey;
-                        this.push('engineers', childData);
-
-                        if(childData.latitude && childData.longitude){
-                            var enggLocation = new google.maps.LatLng(childData.latitude, childData.longitude);
-                            var marker = new google.maps.Marker({
-                                position: enggLocation,
-                                map: window.enggMap.map
-                            });
-                            this.markers.push(marker);
-
-                        }
-
+                this.set('engineers', []);
+                if (this.markers) {
+                    this.markers.forEach((m) => {
+                        m.setMap(null);
                     });
+                }
+                this.markers = [];
+                snap.forEach((childSnapshot) => {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    // ...
+                    childData.id = childKey;
+                    this.push('engineers', childData);
 
-                    var bounds = new google.maps.LatLngBounds();
-                    for (var i = 0; i < this.markers.length; i++) {
-                     bounds.extend(this.markers[i].getPosition());
+                    if (childData.latitude && childData.longitude) {
+                        var enggLocation = new google.maps.LatLng(childData.latitude, childData.longitude);
+                        var marker = new google.maps.Marker({
+                            position: enggLocation,
+                            map: window.enggMap.map
+                        });
+                        this.markers.push(marker);
+
                     }
 
-                    window.enggMap.map.fitBounds(bounds);
+                });
+
+                var bounds = new google.maps.LatLngBounds();
+                for (var i = 0; i < this.markers.length; i++) {
+                    bounds.extend(this.markers[i].getPosition());
+                }
+
+                window.enggMap.map.fitBounds(bounds);
 
 
-                });           
+            });
         }
 
 
@@ -445,39 +462,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 });
         }
 
-        openAddEngineerModal(){
+        openAddEngineerModal() {
 
 
             var enggToAddListRef = firebase.database().ref('/engineers/')
                 .orderByChild('teams/' + this.selectedTeam.id).startAt(null)
                 .endAt(false);
-            
+
 
             enggToAddListRef.once('value', (snap) => {
-                    this.set('engineersToAdd', []);
-                    snap.forEach((childSnapshot) => {
-                        var childKey = childSnapshot.key;
-                        var childData = childSnapshot.val();
-                        // ...
-                        childData.id = childKey;
-                        this.push('engineersToAdd', childData);
+                this.set('engineersToAdd', []);
+                snap.forEach((childSnapshot) => {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    // ...
+                    childData.id = childKey;
+                    this.push('engineersToAdd', childData);
 
-                        /*if(childData.first_name){
-                            this.fixTheEnginner(childKey, childData);
-                        }*/
-                        this.$.addEngineerModal.open();
+                    /*if(childData.first_name){
+                        this.fixTheEnginner(childKey, childData);
+                    }*/
+                    this.$.addEngineerModal.open();
 
 
-                    });
                 });
+            });
             // this.$.addEngineerModal.open();
         }
 
-        addEngineerToTeam(e){
+        addEngineerToTeam(e) {
             console.log('addEngineerToTeam', e.model.__data.engineer);
             var selectedEngineer = e.model.__data.engineer;
             var updates = {};
             updates['/engineers/' + selectedEngineer.id + '/teams/' + this.selectedTeam.id] = true;
+
             firebase.database().ref().update(updates);
             this.$.addEngineerModal.close();
             this.set('engineersToAdd', []);
@@ -577,6 +595,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             firebase.database().ref().update(updates);
             this.newTeam = {};
             this.$.addTeamModal.close();
+        }
+
+        onRemoveTap(e) {
+            e.stopPropagation();
+            // e.preventDefault();
+            console.log('onRemoveTap', e, e.model.__data.engineer);
+            this.engineerToRemove = e.model.__data.engineer;
+            this.$.removeEngineerModal.open();
+
+        }
+
+        showJob(e) {
+            console.log('showJob', e, e.model.__data.engineer);
+        }
+
+        removeEngineer() {
+            console.log('engineerToRemove', this.engineerToRemove);
+            var updates = {};
+            updates['/engineers/' + this.engineerToRemove.id + '/teams/' + this.selectedTeam.id] = false;
+
+                    
+            firebase.database().ref().update(updates);
+            /*firebase.database().ref('/engineers_job/' + this.engineerToRemove.id)
+                .onnce('value', (snap) => {
+                    if(snap.exists()){
+                    }
+                    
+                });*/
         }
 
     }

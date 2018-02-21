@@ -17,7 +17,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="vizuly_radialprogress.min.js"></script>
 <script src="radialprogress.js"></script>
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -266,9 +265,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                         <div>Repair</div>
                                     </paper-item-body>
                                 </paper-item>
-                                <paper-item label="Maintainance" obj="Maintainance">
+                                <paper-item label="Maintenance" obj="Maintenance">
                                     <paper-item-body>
-                                        <div>Maintainance</div>
+                                        <div>Maintenance</div>
                                     </paper-item-body>
                                 </paper-item>
                             </paper-listbox>
@@ -904,14 +903,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             // Get a key for a new Post.
             var newPostKey = firebase.database().ref().child('jobs').push().key;
+            postData.id = newPostKey;
 
             // Write the new post's data simultaneously in the posts list and the user's post list.
             var updates = {};
             updates['/jobs/' + newPostKey] = postData;
-            updates['/engineers_job/' + this.selectedEngineer.id + '/' + newPostKey] = {
+            var engineerJob = {
+                id: newPostKey,
                 machine: this.selectedMachine,
-                customer: this.selectedCustomer
+                customer: this.selectedCustomer,
+                name: this.selectedEngineer.name,
+                status: postData.status
             };
+
+            /*if(this.selectedEngineer.teams){
+                engineerJob.teams = this.selectedEngineer.teams;
+            }*/
+
+            updates['/engineers/' + this.selectedEngineer.id + '/jobs/' + newPostKey] = engineerJob;
 
             return firebase.database().ref().update(updates);
         }

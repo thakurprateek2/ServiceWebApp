@@ -1,0 +1,95 @@
+
+job list
+Job list row 	filter by status, engineer
+Customer Name
+Engineer name 		status
+
+job details
+Customer details
+address
+last updated at
+
+TODO
+{
+	Status: 
+		History
+	Pending since
+	On Hold since
+}
+
+
+Add Job
+Select Customer
+Select Engineer - Drop down/
+
+TODO
+{
+	Schedule Job (Date and time picker) (Hiding the button in UI)
+	Filter dialog and showing addigned jobs
+}
+
+Select Job type
+Select Machine
+Enter Address (Already filled)
+
+TODO
+{
+	engineers list
+	Row
+	Name
+	mobile
+	number of assigned jobs
+
+
+	Engineer details
+	name
+	email
+	mobile (Call action)
+	current location in a map
+	Number of jobs
+		Opens list of jobs in a dialog-
+		on click goes to job details 
+		job history list
+
+}
+
+
+Attendance
+Clock in button
+Clock out button
+
+
+
+Update location 
+
+TODO {
+	location history
+}
+
+
+Add engineer_job table
+ Use that to update engineer in job when ever engineer is updated or better replace the existing engineer
+
+ on job update (status or anthing) replace the job object in engineer
+
+ on job reassign remove the relation in engineer_job and remove the job from engineer object (delete the node)
+
+
+ show progress while checking if admin or engineer
+
+
+ Logout
+
+ Use functions to add created and updated date in jobs inside engineers
+
+
+ check notification functionality
+
+ while marking attendance check for timezone n other stuff
+
+
+ any customer update/ machine update/ should also happen in related jobs and related jobs fields in engineers (Maybe on updating jobs , it should get replaced in engineers, check for that)
+
+ Validations!!! in add job both app and UI
+
+ Constansts for Job types

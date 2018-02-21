@@ -28,7 +28,7 @@
     "google-map": "GoogleWebComponents/google-map#^2.0.2",
     "polymerfire": "firebase/polymerfire#^2.2.0",
     "iron-list": "PolymerElements/iron-list#^2.0.8",
-    "datetime-picker": "fooloomanzoo/datetime-picker#^2.3.8",
+    "datetime-picker": "fooloomanzoo/datetime-picker#^2.7.3",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
     "moment": "^2.18.1",
     "bwt-datatable": "^2.0.1",

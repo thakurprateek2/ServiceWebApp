@@ -96,8 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Engineer" property="engineer" filter hideable>
                             <template>
-                                <span>[[value.first_name]]</span>
-                                <span>[[value.last_name]]</span>
+                                <span>[[value.name]]</span>
                             </template>
                         </paper-datatable-api-column>
                         <paper-datatable-api-column header="Updated" property="updatedTime" hideable>
@@ -344,6 +343,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }, 0);
 
             })
+        }
+
+        getDateFromTime(time) {
+            console.log('getDateFromTime', time, (time && time != ""));
+            if (time && time != "") {
+                return moment.unix(time * -1).format('h:mm a DD MMM YY');
+            } else {
+                return "-- --- ---- -:-- -"
+            }
         }
 
     }
