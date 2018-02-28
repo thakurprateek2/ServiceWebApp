@@ -143,6 +143,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-item>
                 </paper-listbox>
             </div>
+
+            <div class="flexchild">
+                <paper-listbox slot="dropdown-content">
+                    <paper-item>
+                        <paper-item-body two-line>
+                            <div secondary>Attachment</div>
+                            <a href="{{history.image}}" target="_blank">                                
+                                <img style="width:100px; height:100px; " src="{{history.image}}" alt="">
+                            </a>
+                        </paper-item-body>
+                    </paper-item>
+                </paper-listbox>
+            </div>
+
+            <div class="flexchild">
+                <paper-listbox slot="dropdown-content">
+                    <paper-item>
+                        <paper-item-body two-line>
+                            <div secondary>Customer SIgnature</div>
+                            <a href="{{history.signatureImage}}" target="_blank">
+                                <img style="width:100px; height:100px; " src="{{history.signatureImage}}" alt="">
+                            </a>
+                        </paper-item-body>
+                    </paper-item>
+                </paper-listbox>
+            </div>
         </div>
         </template>
     </template>

@@ -93,3 +93,12 @@ Add engineer_job table
  Validations!!! in add job both app and UI
 
  Constansts for Job types
+
+
+ RemoteDBLocation lat , longitude values in android Double
+
+ Decide data type of lat, long. It is string in customer and double in engineers
+
+ Disable update button until job is loaded
+
+ request location permission again if not provided while marking attendance
