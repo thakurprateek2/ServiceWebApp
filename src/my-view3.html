@@ -88,6 +88,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.loadData();
         }
 
+        initializeRightsIfDontExist(engineer) {
+          if (!engineer.rights) {
+            engineer.rights = {
+              admin: false,
+              assign_jobs: false,
+              create_jobs: false,
+              masters: false,
+              update_jobs: false
+            }
+          }else{
+            engineer.rights = {
+              admin: engineer.rights.admin ? engineer.rights.admin : false,
+              assign_jobs: engineer.rights.assign_jobs ? engineer.rights.assign_jobs : false,
+              create_jobs: engineer.rights.create_jobs ? engineer.rights.create_jobs : false,
+              masters: engineer.rights.masters ? engineer.rights.masters : false,
+              update_jobs: engineer.rights.update_jobs ? engineer.rights.update_jobs : false
+            }
+          }
+
+        }
+
         loadData() {
             
 
@@ -98,6 +119,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         var childData = childSnapshot.val();
                         // ...
                         childData.id = childKey;
+                        this.initializeRightsIfDontExist(childData);
                         this.push('engineers', childData);
                     });
                 });

@@ -1,0 +1,97 @@
+Attendance
+in/out on particular day
+leaves management in attendance
+single engineer entire history
+Calendar view
+
+leaves
+
+apply for lraves
+add leaves
+national holidays
+
+
+attendance screens
+
+
+Needs to have a list of engineers fetched***
+
+day view
+month view
+
+-select engineer
+-select month
+-on leave days marked as red or low bar as red
+-national holodays marked as yellow with the festival name
+-sunday marked as pink or number in greyer color
+-leaves request marked as blue ( on click opens modal for accept and reject)
+-index for colors
+-export to excel
+
+
+leave requests
+-list of leave request
+---engg name ()
+---from date with day 
+---to date
+---reason
+---button for accept and reject
+-button for add leave for a engineer
+-open modal 
+---select engineer
+---select from to date
+-dropdown
+---requests
+---accepted
+---rejected
+---button for accepted and rejecte again
+---send notification
+
+Application
+-My leaves
+--list (sorted descending order, start date wise)
+---status (accepted/rejected)
+---cancel a leave
+-add leave
+-open dialog for selected from date/ to date/ reason
+-refresh leave list on new added leave
+-handle notification
+
+
+-Mark attendance
+--update in noth attendance table and non attendace table
+
+
+Databse structure
+{
+    eid
+    location
+    time
+    type
+}
+
+eid {
+    attendance_id
+    in_time
+    out_time
+    location
+}
+
+
+Leave requests
+{
+    eid
+    eid_from
+    eid_to
+    from
+    to 
+    reason
+    status (Requested/ accepted/ rejected)
+}
+
+national_holiday{
+    date
+    ocasion
+}
+
+

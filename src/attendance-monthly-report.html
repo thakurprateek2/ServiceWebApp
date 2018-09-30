@@ -1,0 +1,941 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-search.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="../bower_components/datetime-picker/date-picker.html">
+<link rel="import" href="shared-styles.html">
+<dom-module id="attendance-monthly-report">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+                padding-top: 80px;
+            }
+
+            paper-checkbox {
+                margin-right: 20px;
+                padding: 10px;
+            }
+
+            .flex-horizontal-with-ratios {
+                @apply --layout-horizontal;
+            }
+
+            .flexchild {
+                @apply --layout-flex;
+            }
+
+            .flex2child {
+                @apply --layout-flex-2;
+            }
+
+            .flex3child {
+                @apply --layout-flex-3;
+            }
+
+            .flex6child {
+                @apply --layout-flex-6;
+            }
+
+            .attendance-list-container {
+                position: fixed;
+                margin: auto;
+                width: 98%;
+                /* overflow: hidden; */
+                height: 80%;
+            }
+
+            .vertical-scroll {
+                overflow-y: scroll;
+            }
+
+            #job-list:last-child {
+                margin-bottom: 100px;
+            }
+
+
+            paper-fab {
+                z-index: 1;
+
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+            }
+
+            .dialog-form-input-row {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .dialog-form-input-row paper-input {
+                flex-grow: 1;
+                margin-right: 50px;
+            }
+
+            .dialog-form-input-row paper-input:last-child {
+                margin-right: 0px;
+            }
+
+            /* paper-button.custom:hover {
+            background-color: var(--paper-indigo-100);
+        } */
+
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    background-color: var(--paper-pink-a200) !important;
+                    color: white !important;
+                }
+                ;
+            }
+
+            .attendance-row-label {
+                color: var(--app-primary-color);
+            }
+
+            .attendance-row-label-in {
+                color: var(--paper-green-500);
+            }
+
+            .attendance-row-label-out {
+                color: var(--paper-red-500);
+            }
+
+            .select-date-container {
+                padding-left: 30px;
+            }
+
+            .select-date-container>paper-button {
+                /* width: 60%; */
+                z-index: 1;
+                padding: 0px;
+            }
+
+            .date-element {
+                text-align: center
+            }
+
+            .date-element .date {
+                font-size: 48px;
+            }
+
+            .date-element .time {
+                font-size: 12px;
+            }
+
+            .date-element .duration {
+                font-size: 12px;
+            }
+
+            .select-month>paper-input {
+                float: left;
+            }
+
+            .sub-header {
+                position: fixed;
+                top: 64px;
+                display: table;
+                height: 80px;
+                width: 100%;
+                z-index: 5;
+                max-height: 80px;
+            }
+
+            .sub-header>div {
+                display: table-cell;
+                vertical-align: middle;
+            }
+
+            .sub-header.card {
+                padding: 7px;
+                margin: 0px;
+                border-radius: 0px;
+                background: #FBFBFB;
+            }
+
+            .sub-header .title {
+                font-size: larger;
+                padding-left: 30px;
+                /* padding: 0px; */
+                margin: 0px;
+                font-weight: 400;
+                color: var(--app-primary-color)
+            }
+
+            .flex-container {
+                align-items: center;
+                display: flex;
+                -webkit-flex-direction: row;
+                /* Safari */
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .flex-container>.menu-items {
+                display: flex;
+                -webkit-flex-direction: row-reverse;
+                /* Safari */
+                flex-direction: row-reverse;
+                padding-right: 60px;
+            }
+
+            .menu-items div {
+                padding-right: 10px;
+            }
+
+            .menu-items div.button-container {
+                display: flex;
+                align-items: center;
+            }
+
+            p.label {
+                font-style: italic;
+                text-align: right;
+                font-size: small;
+                padding-top: 10px;
+            }
+
+            paper-button {
+                font-family: 'Roboto', 'Noto', sans-serif;
+                font-weight: normal;
+                font-size: 14px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            paper-button.dark {
+                background-color: var(--paper-grey-900);
+                color: white;
+            }
+
+            paper-button.disabled {
+                color: white;
+            }
+        </style>
+
+        <div class="sub-header card">
+            <div>
+                <div class="flex-container">
+                    <div>
+                        <p class="title">Monthly Attendance Report</p>
+                    </div>
+                    <div class="menu-items">
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="exportAttendance">Export Excel</paper-button>
+                        </div>
+                        <div>
+                            <paper-dropdown-menu class="teamDropDown" label="Select Month" on-selected-item-changed="monthSelected">
+                                <paper-listbox slot="dropdown-content" selected="{{getSelectedMonth()}}">
+                                    <template is="dom-repeat" items="{{months}}" as="month">
+                                        <paper-item label="{{month.label}}" obj="{{month}}">
+                                            <paper-item-body two-line>
+                                                <div>{{month.label}}</div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </paper-dropdown-menu>
+                        </div>
+
+                        <div>
+                            <paper-input value="{{year}}" label="Enter Year" type="number" on-change="onYearChnage" validator='yearValidator'></paper-input>
+                        </div>
+
+
+                        <div>
+                            <paper-dropdown-menu class="teamDropDown" label="Select Engineer" on-selected-item-changed="onEngineerSelected">
+                                <paper-listbox slot="dropdown-content">
+                                    <template is="dom-repeat" items="{{engineers}}" as="engineer">
+                                        <paper-item label="{{engineer.name}}" obj="{{engineer}}">
+                                            <paper-item-body two-line>
+                                                <div>{{engineer.name}}</div>
+                                                <div secondary>{{engineer.email}}</div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </paper-dropdown-menu>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+        <p class="label">
+            <span style="color: Red; padding-right: 5px;">*Absent/On Leave</span>
+            <span style="color: Olive; padding-right: 5px;">*National Holiday</span>
+            <span style="color: Blue; padding-right: 5px;">*Pending Leave request</span>
+        </p>
+        <div class="flex-horizontal-with-ratios">
+
+            <div class="flexchild select-month">
+
+
+                <!-- <paper-button raised class="custom indigo">
+                    {{leaveRequestLabel}}
+                </paper-button> -->
+            </div>
+
+        </div>
+        <div class="card flex-horizontal-with-ratios">
+            <div class="flexchild" style="text-align: center">Mon</div>
+            <div class="flexchild" style="text-align: center">Tue</div>
+            <div class="flexchild" style="text-align: center">Wed</div>
+            <div class="flexchild" style="text-align: center">Thu</div>
+            <div class="flexchild" style="text-align: center">Fri</div>
+            <div class="flexchild" style="text-align: center">Sat</div>
+            <div class="flexchild" style="text-align: center">Sun</div>
+        </div>
+
+
+
+        <template is="dom-if" if="{{!isLoading}}">
+            <template is="dom-repeat" items="{{weekArray}}" as="week">
+                <div class="card flex-horizontal-with-ratios">
+
+                    <template is="dom-repeat" items="{{week}}" as="day">
+
+                        <div class="flexchild date-element">
+                            <template is="dom-if" if="{{day.hasDate}}">
+                                <div class="date">{{getDateText(day)}}</div>
+                                <div class="time">{{getDaysAttendance(day)}}</div>
+                                <div class="duration">{{day.durationText}}</div>
+                                <template is="dom-if" if="{{day.leave}}">
+                                    <div style="height:8px;background-color:red;"></div>
+                                    <paper-tooltip position="top" animation-delay="100">{{getLeaveToolTip(day.leave)}}</paper-tooltip>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+
+        <template is="dom-if" if="{{isLoading}}">
+            <div class="card flex-horizontal-with-ratios">
+                <div class="flexchild date-element">
+                    <paper-spinner active></paper-spinner>
+                </div>
+            </div>
+        </template>
+
+        <!-- <paper-fab icon="icons:play-for-work" on-tap="exportAttendance"></paper-fab> -->
+
+        <!-- <paper-fab-speed-dial id="addMenu" with-backdrop>
+            <paper-fab-speed-dial-action on-tap="openImportModal" icon="icons:dns">Import</paper-fab-speed-dial-action>
+            <paper-fab-speed-dial-action on-tap="openAddCustomerModal" icon="icons:account-circle">Add Customer</paper-fab-speed-dial-action>
+        </paper-fab-speed-dial> -->
+        <paper-dialog id="addNewProduct">
+            <h2>Import Excel</h2>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-input id="excelFileInput" on-change="gotExcelFile" value="{{newProduct.machine_id}}" label="Product code" type="file"></paper-input>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createNewProduct" dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </paper-dialog>
+        <!-- <div class="circle">3</div>
+      <h1>View Three</h1>
+      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
+      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p> -->
+    </template>
+    <script>
+        class AttendanceMonthlyReport extends Polymer.Element {
+            static get is() { return 'attendance-monthly-report'; }
+            static get properties() {
+                return {
+
+                    isLoading: {
+                        type: Boolean,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: false
+                    },
+
+                    year: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: moment().year()
+                    },
+
+                    selectedMonth: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: moment().month()
+                    },
+
+                    months: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: [{ index: 0, label: "January" }, { index: 1, label: "February" }, { index: 2, label: "March" }, { index: 3, label: "April" }, { index: 4, label: "May" },
+                        { index: 5, label: "June" }, { index: 6, label: "July" }, { index: 7, label: "August" }, { index: 8, label: "September" }, { index: 9, label: "October" },
+                        { index: 10, label: "November" }, { index: 11, label: "December" },]
+                    },
+
+                    weekArray: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+                    engineers: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+
+                    attendanceList: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+
+                    leaveList: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+
+                    attendanceDateList: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+
+                    selectedEngineer: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        notify: true
+                    },
+
+                    //Overwritten properties from excel behavious start
+                    tableName: {
+                        type: String,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: 'customers'
+                    },
+
+                    sheetName: {
+                        type: String,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: 'data'
+                    },
+
+                    newCust: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        value: {}
+
+                    },
+
+                    //Overwritten properties from excel behavious end
+
+                }
+            }
+
+            ready() {
+                super.ready();
+                // this.createWeekArrays();
+                this.loadData();
+
+            }
+
+
+            createWeekArrays() {
+                // this.weekArray.push(1);
+                // this.weekArray.push(3);
+
+                var firstDay = moment();
+                firstDay.date(1);
+                firstDay.month(this.selectedMonth);
+                firstDay.year(this.year);
+
+                this.weekArray = [[]];
+                var weekCount = 0;
+                while (firstDay.month() === this.selectedMonth) {
+                    this.weekArray[weekCount].push({
+                        date: firstDay.toDate(),
+                        hasDate: true
+                    })
+                    if (firstDay.day() === 0) {
+                        weekCount++;
+                        this.weekArray.push([]);
+                    }
+                    firstDay.add('day', 1);
+                }
+
+                var firstWeek = this.weekArray[0];
+                var lastWeek = this.weekArray[this.weekArray.length - 1];
+                while (firstWeek.length !== 7) {
+                    firstWeek.splice(0, 0, {
+                        hasDate: null
+                    });
+                }
+                while (lastWeek.length !== 7) {
+                    lastWeek.push({
+                        hasDate: null
+                    });
+                }
+
+
+            }
+
+            getSelectedMonth() {
+                return this.selectedMonth;
+            }
+
+            monthSelected(e) {
+                console.log('Selected Month', e);
+                if (e.detail && e.detail.value && this.selectedEngineer) {
+                    this.selectedMonth = e.detail.value.obj.index;
+                    console.log('selectedEngineer', this.selectedMonth);
+                    this.fetchAttendanceData();
+                    // this.isLoading = true;
+                    // setTimeout(() => {
+                    //     this.createWeekArrays();
+                    //     this.isLoading = false;
+                    // }, 2000);
+                }
+            }
+
+            fetchAttendanceData() {
+                if (!this.selectedEngineer) {
+                    return;
+                }
+
+                this.isLoading = true;
+                this.getLeaveRequests(this.selectedEngineer, () => {
+                    this.getEngineerAttendance(this.selectedEngineer);
+                });
+            }
+
+            getLeaveRequests(engg, onLeavesFetched) {
+
+                if (!engg) {
+                    return;
+                }
+
+                var firstDay = moment();
+                firstDay.date(1);
+                firstDay.month(this.selectedMonth);
+                firstDay.year(this.year);
+                firstDay.startOf('month');
+
+                var lastDay = moment();
+                lastDay.date(1);
+                lastDay.month(this.selectedMonth);
+                lastDay.year(this.year);
+                lastDay.endOf('month');
+
+
+                var startTime = firstDay.toDate().getTime();
+                var endTime = lastDay.toDate().getTime();
+
+                this.attendanceDateList = [];
+
+                firebase.database().ref("/leaveRequests/").orderByChild("engineerId_from")
+                    .startAt(engg.id + '_' + startTime)
+                    .endAt(engg.id + '_' + endTime)
+                    .once('value', (snap) => {
+                        console.log('engg leaves')
+                        // this.set('engineers', []);
+                        this.leaveList = [];
+                        snap.forEach((childSnapshot) => {
+                            var childKey = childSnapshot.key;
+                            var childData = childSnapshot.val();
+                            this.leaveList.push({
+                                start: moment(childData.from).startOf('day').toDate().getTime(),
+                                end: moment(childData.to).endOf('day').toDate().getTime(),
+                                leaveRequest: childData
+                            });
+                            console.log('engg leave from', moment(childData.from).format('DD MMMM YYYY h:mm a'));
+                            console.log('engg leave to', moment(childData.to).format('DD MMMM YYYY h:mm a'));
+                            console.log('engg leave', childKey, childData);
+                        });
+
+                        if (onLeavesFetched) {
+                            onLeavesFetched();
+                        }
+
+                        // this.createWeekArrays();
+
+                    });
+
+            }
+
+            getLeaveToolTip(leave) {
+                return leave.reason ? ('On Leave: ' + leave.reason) : 'On Leave';
+            }
+
+            onEngineerSelected(e) {
+
+                if (!e.detail || !e.detail.value) {
+                    return;
+                }
+
+                var engg = e.detail.value.obj;
+
+                this.selectedEngineer = engg;
+
+                this.fetchAttendanceData();
+            }
+
+            onYearChnage() {
+                if (this.yearValidator(this.year)) {
+                    // this.createWeekArrays();
+                    this.fetchAttendanceData();
+                }
+            }
+
+            yearValidator(value) {
+                return parseInt(value) > 1970;
+
+            }
+
+            getDateText(day) {
+                if (day.hasDate) {
+                    return day.date.getDate();
+                } else {
+                    return '';
+                }
+            }
+
+            getDaysAttendance(day) {
+                var startMoment = moment(day.date);
+                startMoment.startOf('day');
+                var endMoment = moment(day.date);
+                endMoment.endOf('day');
+
+                var daysAttendanceList = _.filter(this.attendanceDateList, function (d) {
+                    return d.getTime() >= startMoment.toDate().getTime()
+                        &&
+                        d.getTime() <= endMoment.toDate().getTime();
+                });
+
+                //Find leaves that are applied on this day
+                var dayLeaveList = _.filter(this.leaveList, function (d) {
+                    return d.start <= startMoment.toDate().getTime()
+                        &&
+                        d.end >= startMoment.toDate().getTime();
+                });
+
+                if (dayLeaveList && dayLeaveList.length) {
+                    day.leave = dayLeaveList[0].leaveRequest;
+                }
+
+                if (daysAttendanceList && daysAttendanceList.length) {
+                    var timeFormat = "h:mm a"
+                    var firstAttendance = moment(daysAttendanceList[0]);
+
+                    var lastAttendance = daysAttendanceList.length > 1 ?
+                        moment(daysAttendanceList[daysAttendanceList.length - 1]) : null;
+
+                    if (!lastAttendance) {
+                        day.durationText = '0 hours';
+                        day.duration = 0;
+                        day.fromText = '--:-- -';
+                        day.toText = '--:-- -';
+                    } else {
+                        day.duration = lastAttendance.toDate().getTime() - firstAttendance.toDate().getTime()
+                        day.durationText = Math.round((day.duration / (1000 * 60 * 60)) * 100) / 100 + ' hours';
+                        day.fromText = firstAttendance.format(timeFormat);
+                        day.toText = (lastAttendance ? lastAttendance.format(timeFormat) : '--:-- -');
+                    }
+
+                    return (day.fromText + ' to ' + day.toText);
+
+                } else {
+                    day.durationText = '0 hours';
+                    day.duration = 0;
+                    day.fromText = '--:-- -';
+                    day.toText = '--:-- -';
+                    return "--:-- - to --:-- -"
+                }
+
+            }
+
+            connectedCallback() {
+                super.connectedCallback();
+                // this.loadData();
+            }
+
+            _onDateSelectChange(newVal, oldVal) {
+                console.log('_onDateSelectChange', newVal, oldVal);
+                this.loadData();
+
+            }
+
+            getEngineerAttendance(engg) {
+
+                if (!engg) {
+                    return;
+                }
+
+
+                this.isLoading = true;
+
+                var firstDay = moment();
+                firstDay.date(1);
+                firstDay.month(this.selectedMonth);
+                firstDay.year(this.year);
+                firstDay.startOf('month');
+
+                var lastDay = moment();
+                lastDay.date(1);
+                lastDay.month(this.selectedMonth);
+                lastDay.year(this.year);
+                lastDay.endOf('month');
+
+
+                var startTime = firstDay.toDate().getTime();
+                var endTime = lastDay.toDate().getTime();
+
+                this.attendanceDateList = [];
+
+                firebase.database().ref('/attendance/').orderByChild("engineerId_time")
+                    .startAt(engg.id + '_' + startTime)
+                    .endAt(engg.id + '_' + endTime)
+                    .once('value', (snap) => {
+                        // this.set('engineers', []);
+                        snap.forEach((childSnapshot) => {
+                            var childKey = childSnapshot.key;
+                            var childData = childSnapshot.val();
+                            var attendanceDate = new Date(childData.time);
+                            this.attendanceDateList.push(attendanceDate);
+                            console.log('engg time of attendance', moment(attendanceDate).format('DD MMMM YYYY h:mm a'));
+                            // ...
+                            // childData.id = childKey;
+                            // this.push('engineers', childData);
+                            console.log('engg attendance', childKey, childData);
+                        });
+
+                        this.createWeekArrays();
+
+                        this.isLoading = false;
+                    });
+            }
+
+
+            //Excel behaviour implemented methods end
+
+            // gotExcelFile() {
+            //   console.log("gotExcelFile");
+            //     var excelFileInput = this.$.excelFileInput;
+
+            //     var reader = new FileReader();
+
+            //     reader.onload = function (e) {
+            //       /* read workbook */
+            //       var bstr = e.target.result;
+            //       window.workbook = XLSX.read(bstr, {type:'binary'});
+            //       var engineers = XLS.utils.sheet_to_row_object_array(window.workbook.Sheets['Engineer Details ']);
+            //       console.log('engineers', engineers);
+
+            //       /* DO SOMETHING WITH workbook HERE */
+            //     };
+
+            //     reader.readAsBinaryString(this.$.excelFileInput.inputElement.inputElement.files[0]);
+
+            // }
+
+            loadData() {
+
+
+                firebase.database().ref('/engineers/')
+                    .on('value', (snap) => {
+                        var allEngineersObj = snap.val();
+                        this.set('engineers', []);
+                        snap.forEach((childSnapshot) => {
+                            var childKey = childSnapshot.key;
+                            var childData = childSnapshot.val();
+                            // ...
+                            childData.id = childKey;
+                            this.push('engineers', childData);
+                        });
+                    });
+            }
+
+
+            // addAttendanceDeatils(allEngineersObj, childData) {
+            //     if (!allEngineersObj[childData.engineerId].attendance) {
+
+            //         allEngineersObj[childData.engineerId].attendance = {
+            //             'name': allEngineersObj[childData.engineerId].name,
+            //             'checkIn': {
+            //                 displayTime: '--:-- -'
+            //             },
+            //             'checkOut': {
+            //                 displayTime: '--:-- -'
+            //             },
+            //             duration: '---'
+            //         };
+            //     }
+            //     // ...
+            //     // childData.id = childKey;
+            //     var engginCheckIn = allEngineersObj[childData.engineerId].attendance.checkIn;
+
+            //     if (!engginCheckIn.time || engginCheckIn.time > childData.time) {
+            //         allEngineersObj[childData.engineerId].attendance.checkIn = childData;
+            //         allEngineersObj[childData.engineerId].attendance
+            //             .checkIn.displayTime = moment(childData.time).format('h:mm a');
+            //     }
+
+
+            //     var engginCheckOut = allEngineersObj[childData.engineerId].attendance.checkOut;
+
+            //     if (!engginCheckOut.time || engginCheckOut.time < childData.time) {
+            //         allEngineersObj[childData.engineerId].attendance.checkOut = childData;
+            //         allEngineersObj[childData.engineerId].attendance
+            //             .checkOut.displayTime = moment(childData.time).format('h:mm a');
+            //     }
+
+            //     var duration = allEngineersObj[childData.engineerId].attendance.checkOut.time - allEngineersObj[childData.engineerId].attendance.checkIn.time;
+
+            //     if (duration) {
+            //         allEngineersObj[childData.engineerId].attendance.duration = Math.round((duration / (1000 * 60 * 60)) * 100) / 100 + ' hours';
+            //     } else {
+            //         allEngineersObj[childData.engineerId].attendance.duration = '---';
+            //     }
+            // }
+
+            onAccessChanged(e) {
+                console.log("onAccessChanged", e);
+                setTimeout(() => {
+                    var updated = e.model.__data.engineer;
+                    console.log("updated", updated);
+
+                    firebase.database().ref('/engineers/' + updated.id).set(updated).then(function (snapshot) {
+                        console.log("After Update", snapshot);
+                    }, 0);
+
+                })
+            }
+
+            exportAttendance() {
+                var exportData = [];
+                this.weekArray.forEach((week) => {
+                    week.forEach((day) => {
+                        if (day.hasDate) {
+                            exportData.push({
+                                'Clock In Time': day.fromText,
+                                'Clock Out Time': day.toText,
+                                'Duration': day.durationText,
+                                'Leave': day.leave ? day.leave.reason : ''
+                            })
+                        }
+
+                    })
+                });
+                this.JSONToCSVConvertor(exportData, 'Attendance for ' + this.selectedEngineer.name + ' for the month of ' + this.months[this.selectedMonth].label, true);
+            }
+
+            JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+                //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+                var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+                var CSV = '';
+                //Set Report title in first row or line
+
+                CSV += ReportTitle + '\r\n\n';
+
+                //This condition will generate the Label/Header
+                if (ShowLabel) {
+                    var row = "";
+
+                    //This loop will extract the label from 1st index of on array
+                    for (var index in arrData[0]) {
+
+                        //Now convert each value to string and comma-seprated
+                        row += index + ',';
+                    }
+
+                    row = row.slice(0, -1);
+
+                    //append Label row with line break
+                    CSV += row + '\r\n';
+                }
+
+                //1st loop is to extract each row
+                for (var i = 0; i < arrData.length; i++) {
+                    var row = "";
+
+                    //2nd loop will extract each column and convert it in string comma-seprated
+                    for (var index in arrData[i]) {
+                        row += '"' + arrData[i][index] + '",';
+                    }
+
+                    row.slice(0, row.length - 1);
+
+                    //add a line break after each row
+                    CSV += row + '\r\n';
+                }
+
+                if (CSV == '') {
+                    alert("Invalid data");
+                    return;
+                }
+
+                //Generate a file name
+                var fileName = "MyReport_";
+                //this will remove the blank-spaces from the title and replace it with an underscore
+                fileName += ReportTitle.replace(/ /g, "_");
+
+                //Initialize file format you want csv or xls
+                var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+                // Now the little tricky part.
+                // you can use either>> window.open(uri);
+                // but this will not work in some browsers
+                // or you will not get the correct file extension    
+
+                //this trick will generate a temp <a /> tag
+                var link = document.createElement("a");
+                link.href = uri;
+
+                //set the visibility hidden so it will not effect on your web-layout
+                link.style = "visibility:hidden";
+                link.download = fileName + ".csv";
+
+                //this part will append the anchor tag and remove it after automatic click
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+        }
+
+        window.customElements.define(AttendanceMonthlyReport.is, AttendanceMonthlyReport);
+    </script>
+</dom-module>

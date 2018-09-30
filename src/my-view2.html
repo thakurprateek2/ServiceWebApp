@@ -15,74 +15,177 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-view2">
     <template>
         <style include="shared-styles">
-         :host {
-            display: block;
+            :host {
+                display: block;
 
-            padding: 10px;
-        }
+                padding-top: 100px;
 
-        paper-button.indigo {
-            background-color: var(--paper-indigo-500);
-            color: white;
-            --paper-button-raised-keyboard-focus: {
-                background-color: var(--paper-pink-a200) !important;
-                color: white !important;
             }
-            ;
-        }
 
-        .flex-horizontal-with-ratios {
-            @apply --layout-horizontal;
-        }
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    background-color: var(--paper-pink-a200) !important;
+                    color: white !important;
+                }
+                ;
+            }
 
-        .flexchild {
-            @apply --layout-flex;
-        }
+            .flex-horizontal-with-ratios {
+                @apply --layout-horizontal;
+            }
 
-        .flex2child {
-            @apply --layout-flex-2;
-        }
+            .flexchild {
+                @apply --layout-flex;
+            }
+
+            .flex2child {
+                @apply --layout-flex-2;
+            }
 
 
 
-        paper-dialog {
-            width: 60%;
-        }
+            paper-dialog {
+                width: 60%;
+            }
 
-        paper-dialog-scrollable>div.container>div {
-            padding: 10px;
-        }
+            paper-dialog-scrollable>div.container>div {
+                padding: 10px;
+            }
 
-        paper-dialog-scrollable>div.container paper-dropdown-menu {
-            width: 100%;
-        }
+            paper-dialog-scrollable>div.container paper-dropdown-menu {
+                width: 100%;
+            }
 
-        .dialog-form-input-row {
-            display: flex;
-            flex-direction: row;
-        }
+            .dialog-form-input-row {
+                display: flex;
+                flex-direction: row;
+            }
 
-        .dialog-form-input-row paper-input {
-            flex-grow: 1;
-            margin-right: 50px;
-        }
+            .dialog-form-input-row paper-input {
+                flex-grow: 1;
+                margin-right: 50px;
+            }
 
-        .dialog-form-input-row paper-input:last-child {
-            margin-right: 0px;
-        }
+            .dialog-form-input-row paper-input:last-child {
+                margin-right: 0px;
+            }
+
+            .sub-header {
+                position: fixed;
+                top: 64px;
+                display: table;
+                height: 80px;
+                width: 100%;
+                z-index: 5;
+                max-height: 80px;
+            }
+
+            .sub-header>div {
+                display: table-cell;
+                vertical-align: middle;
+            }
+
+            .sub-header.card {
+                padding: 7px;
+                margin: 0px;
+                border-radius: 0px;
+                background: #FBFBFB;
+            }
+
+            .sub-header .title {
+                font-size: larger;
+                padding-left: 30px;
+                /* padding: 0px; */
+                margin: 0px;
+                font-weight: 400;
+                color: var(--app-primary-color)
+            }
+
+            .flex-container {
+                align-items: center;
+                display: flex;
+                -webkit-flex-direction: row;
+                /* Safari */
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .flex-container>.menu-items {
+                display: flex;
+                -webkit-flex-direction: row-reverse;
+                /* Safari */
+                flex-direction: row-reverse;
+                padding-right: 60px;
+            }
+
+            .menu-items div {
+                padding-right: 10px;
+            }
+
+            .menu-items div.button-container {
+                display: flex;
+                align-items: center;
+            }
+
+            p.label {
+                font-style: italic;
+                text-align: right;
+                font-size: small;
+                padding-top: 10px;
+            }
+
+            paper-button {
+                font-family: 'Roboto', 'Noto', sans-serif;
+                font-weight: normal;
+                font-size: 14px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            paper-button.dark {
+                background-color: var(--paper-grey-900);
+                color: white;
+            }
+
+            paper-button.disabled {
+                color: white;
+            }
         </style>
-        <paper-fab-speed-dial id="addMenu" with-backdrop>
+
+        <div class="sub-header card">
+            <div>
+                <div class="flex-container">
+                    <div>
+                        <p class="title">Masters</p>
+                    </div>
+                    <div class="menu-items">
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="addProduct">Add Product</paper-button>
+                        </div>
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="addPart">Add Part</paper-button>
+                        </div>
+
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="addCustomer">Add Customer</paper-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <paper-fab-speed-dial id="addMenu" with-backdrop>
             <paper-fab-speed-dial-action on-tap="addProduct" icon="icons:dns">Add Product</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="addPart" icon="icons:build">Add Part</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="addCustomer" icon="icons:account-circle">Add Customer</paper-fab-speed-dial-action>
-        </paper-fab-speed-dial>
+        </paper-fab-speed-dial> -->
         <paper-dialog id="addNewProduct">
             <h2>Add New Product</h2>
             <paper-dialog-scrollable>
                 <div class="container">
                     <paper-input value="{{newProduct.machine_id}}" label="Product code"></paper-input>
                     <paper-input value="{{newProduct.name}}" label="Name"></paper-input>
-                    <paper-input value="{{newProduct.decription}}" label="Decription" ></paper-input>
+                    <paper-input value="{{newProduct.decription}}" label="Decription"></paper-input>
                 </div>
             </paper-dialog-scrollable>
             <div class="buttons">
@@ -129,7 +232,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="container flex2child flex-horizontal-with-ratios">
                 <div class="flexchild card">
                     <div>Customer List</div>
-                    <paper-datatable-api id="custListTable" page="{{custListPage}}" on-sort="_handleSortCustList" on-filter="_handleFilterCustList" paginate on-selection-changed="_handleSelectionChanged">
+                    <paper-datatable-api id="custListTable" page="{{custListPage}}" on-sort="_handleSortCustList" on-filter="_handleFilterCustList"
+                        paginate on-selection-changed="_handleSelectionChanged">
                         <paper-datatable-api-column header="Name" property="name" filter>
                             <template>
                                 <span>[[value]]</span>
@@ -151,7 +255,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="container flex2child flex-horizontal-with-ratios">
                 <div class="flexchild card">
                     <div>Parts List</div>
-                    <paper-datatable-api id="partListTable" page="{{partListPage}}" on-sort="_handleSortPartList" on-filter="_handleFilterPartList" paginate on-selection-changed="_handleSelectionChanged">
+                    <paper-datatable-api id="partListTable" page="{{partListPage}}" on-sort="_handleSortPartList" on-filter="_handleFilterPartList"
+                        paginate on-selection-changed="_handleSelectionChanged">
                         <paper-datatable-api-column header="Part Code" property="code" filter>
                             <template>
                                 <span>[[value]]</span>
@@ -175,7 +280,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="container flex2child flex-horizontal-with-ratios">
                 <div class="flexchild card">
                     <div>Product List</div>
-                    <paper-datatable-api id="machineListTable" page="{{machineListPage}}" on-sort="_handleSortMachineList" on-filter="_handleFilterMachineList" paginate on-selection-changed="_handleSelectionChanged">
+                    <paper-datatable-api id="machineListTable" page="{{machineListPage}}" on-sort="_handleSortMachineList" on-filter="_handleFilterMachineList"
+                        paginate on-selection-changed="_handleSelectionChanged">
                         <paper-datatable-api-column header="Product Code" property="machine_id" filter>
                             <template>
                                 <span>[[value]]</span>
@@ -205,326 +311,326 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
     </template>
     <script>
-    class MyView2 extends Polymer.Element {
-        static get is() { return 'my-view2'; }
+        class MyView2 extends Polymer.Element {
+            static get is() { return 'my-view2'; }
 
-        static get observers() {
-            return [
-                // Observer method name, followed by a list of dependencies, in parenthesis
-                '_specificationsChnages(specifications.*)'
-            ]
-        }
+            static get observers() {
+                return [
+                    // Observer method name, followed by a list of dependencies, in parenthesis
+                    '_specificationsChnages(specifications.*)'
+                ]
+            }
 
 
-        static get properties() {
-            return {
-                specifications: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    observer: '_specificationsChnages',
-                    value: {
-                        company_name: "",
-                        product_id: ""
+            static get properties() {
+                return {
+                    specifications: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        observer: '_specificationsChnages',
+                        value: {
+                            company_name: "",
+                            product_id: ""
+                        }
+                    },
+
+                    customers: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        value: []
+                    },
+
+                    parts: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        value: []
+                    },
+
+                    machines: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        value: []
+                    },
+
+
+                    machineListPage: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: 0,
+                        observer: 'machineListPageChange',
+
+                    },
+
+                    partListPage: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: 0,
+                        observer: 'partListPageChange',
+
+                    },
+
+                    custListPage: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: 0,
+                        observer: 'custListPageChange',
+
+                    },
+
+                    qrcode: {
+                        type: Object
+                    },
+
+                    newCust: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        value: {}
+
+                    },
+
+                    newPart: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        value: {}
+
+                    },
+
+                    newProduct: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        value: {}
+
+                    },
+
+                    machinesRef: {
+                        type: Object,
+                        reflectToAttribute: true
+
+                    },
+
+                    partsRef: {
+                        type: Object,
+                        reflectToAttribute: true
+
+                    },
+
+                    customersRef: {
+                        type: Object,
+                        reflectToAttribute: true
+
                     }
-                },
 
-                customers: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    value: []
-                },
+                };
+            }
 
-                parts: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    value: []
-                },
+            ready() {
+                super.ready();
 
-                machines: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    value: []
-                },
+            }
 
 
-                machineListPage: {
-                    type: Number,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: 0,
-                    observer: 'machineListPageChange',
+            machineListPageChange(pageNumber) {
+                console.log('_pageChanged', pageNumber);
+                this.fetchObjects(pageNumber, "", this.machines, 'machines', 'machineListTable', 'machinesRef');
+            }
 
-                },
+            _handleSortMachineList(event) {
+                console.log('_handleSort', event);
+                // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+            }
 
-                partListPage: {
-                    type: Number,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: 0,
-                    observer: 'partListPageChange',
+            _handleFilterMachineList(event) {
+                console.log('_handleFilter', event);
 
-                },
+                // this.fetchJobs(0,event.detail.filter);
+                this.fetchObjects(0, event.detail.filter, this.machines, 'machines', 'machineListTable', 'machinesRef')
 
-                custListPage: {
-                    type: Number,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: 0,
-                    observer: 'custListPageChange',
 
-                },
+            }
 
-                qrcode: {
-                    type: Object
-                },
 
-                newCust: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    value: {}
+            partListPageChange(pageNumber) {
+                console.log('_pageChanged', pageNumber);
+                this.fetchObjects(pageNumber, "", this.parts, 'parts', 'partListTable', 'partsRef');
+            }
 
-                },
+            _handleSortPartList(event) {
+                console.log('_handleSort', event);
+                // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+            }
 
-                newPart: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    value: {}
+            _handleFilterPartList(event) {
+                console.log('_handleFilter', event);
 
-                },
+                // this.fetchJobs(0,event.detail.filter);
+                this.fetchObjects(0, event.detail.filter, this.parts, 'parts', 'partListTable', 'partsRef');
 
-                newProduct: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    value: {}
 
-                },
+            }
 
-                machinesRef: {
-                    type: Object,
-                    reflectToAttribute: true
 
-                },
+            custListPageChange(pageNumber) {
+                console.log('_pageChanged', pageNumber);
+                this.fetchObjects(pageNumber, "", this.customers, 'customers', 'custListTable', 'customersRef');
+            }
 
-                partsRef: {
-                    type: Object,
-                    reflectToAttribute: true
+            _handleSortCustList(event) {
+                console.log('_handleSort', event);
+                // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
+            }
 
-                },
+            _handleFilterCustList(event) {
+                console.log('_handleFilter', event);
 
-                customersRef: {
-                    type: Object,
-                    reflectToAttribute: true
+                // this.fetchJobs(0,event.detail.filter);
+                this.fetchObjects(0, event.detail.filter, this.customers, 'customers', 'custListTable', 'customersRef');
 
+
+            }
+
+            fetchObjects(pageNumber, querry, mainArray, tableName, tableId, oldRef) {
+
+                if (this[oldRef]) {
+                    this[oldRef].off();
+                    console.log("Discarding old ref");
                 }
 
-            };
-        }
+                var ref = firebase.database().ref('/' + tableName + '/');
+                var rootRef = firebase.database();
+                if (querry && querry.value && querry.value != "") {
+                    //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
 
-        ready() {
-            super.ready();
+                    ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
+                }
 
-        }
-
-
-        machineListPageChange(pageNumber) {
-            console.log('_pageChanged', pageNumber);
-            this.fetchObjects(pageNumber, "", this.machines, 'machines', 'machineListTable', 'machinesRef');
-        }
-
-        _handleSortMachineList(event) {
-            console.log('_handleSort', event);
-            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
-        }
-
-        _handleFilterMachineList(event) {
-            console.log('_handleFilter', event);
-
-            // this.fetchJobs(0,event.detail.filter);
-            this.fetchObjects(0, event.detail.filter, this.machines, 'machines', 'machineListTable', 'machinesRef')
+                this[oldRef] = ref;
 
 
-        }
+                this[oldRef].on('value', (snap) => {
+
+                    mainArray = [];
+
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        childData.id = childKey;
+
+                        mainArray.push(childSnapshot.val());
 
 
-        partListPageChange(pageNumber) {
-            console.log('_pageChanged', pageNumber);
-            this.fetchObjects(pageNumber, "", this.parts, 'parts', 'partListTable', 'partsRef');
-        }
 
-        _handleSortPartList(event) {
-            console.log('_handleSort', event);
-            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
-        }
-
-        _handleFilterPartList(event) {
-            console.log('_handleFilter', event);
-
-            // this.fetchJobs(0,event.detail.filter);
-            this.fetchObjects(0, event.detail.filter, this.parts, 'parts', 'partListTable', 'partsRef');
+                    });
 
 
-        }
+                    console.log("list", tableName, mainArray);
+                    var pageSize = 4;
+                    this.setUpPage(mainArray, tableId, pageSize, pageNumber);
 
+                    // ref.off();
 
-        custListPageChange(pageNumber) {
-            console.log('_pageChanged', pageNumber);
-            this.fetchObjects(pageNumber, "", this.customers, 'customers', 'custListTable', 'customersRef');
-        }
-
-        _handleSortCustList(event) {
-            console.log('_handleSort', event);
-            // this.sortProperty = event.detail.sort.property + ',' + event.detail.sort.direction;
-        }
-
-        _handleFilterCustList(event) {
-            console.log('_handleFilter', event);
-
-            // this.fetchJobs(0,event.detail.filter);
-            this.fetchObjects(0, event.detail.filter, this.customers, 'customers', 'custListTable', 'customersRef');
-
-
-        }
-
-        fetchObjects(pageNumber, querry, mainArray, tableName, tableId, oldRef) {
-
-            if(this[oldRef]){
-              this[oldRef].off();
-              console.log("Discarding old ref");
-            }
-
-            var ref = firebase.database().ref('/' + tableName + '/');
-            var rootRef = firebase.database();
-            if (querry && querry.value && querry.value != "") {
-                //ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(`${querry.value}\uf8ff`);
-
-                ref = ref.orderByChild(querry.property.replace(".", "/")).startAt(querry.value).endAt(querry.value + "\uf8ff")
-            }
-
-            this[oldRef] = ref;
-
-
-            this[oldRef].on('value', (snap) => {
-
-                mainArray = [];
-
-                snap.forEach((childSnapshot) => {
-                    var childKey = childSnapshot.key;
-                    var childData = childSnapshot.val();
-                    childData.id = childKey;
-
-                    mainArray.push(childSnapshot.val());
 
 
 
                 });
 
 
-                console.log("list", tableName, mainArray);
-                var pageSize = 4;
-                this.setUpPage(mainArray, tableId, pageSize, pageNumber);
-
-                // ref.off();
-
-
-
-
-            });
-
-
-        }
-
-
-        setUpPage(objectArray, tableId, pageSize, pageNumber) {
-
-            var dataTable = this.shadowRoot.querySelector('#' + tableId);
-            var startIndex = pageNumber * pageSize;
-            var endIndex = startIndex + pageSize;
-            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
-
-            var objectsOnPage = objectArray.slice(startIndex, endIndex);
-            dataTable.set('data', objectsOnPage);
-            dataTable.set('availableSize', [pageSize]);
-            dataTable.set('size', pageSize);
-            dataTable.set('totalPages', objectArray.length / pageSize);
-            // dataTable.set('page', 0);
-            dataTable.set('totalElements', objectArray.length);
-
-        }
-
-
-        addProduct(e) {
-            this.$.addMenu.close();
-            this.$.addNewProduct.open();
-        }
-
-        createNewProduct() {
-            var newPostKey = firebase.database().ref().child('machines').push().key;
-
-            var updates = {};
-            updates['/machines/' + newPostKey] = this.newProduct;
-
-            firebase.database().ref().update(updates);
-            this.newProduct = {};
-        }
-
-
-        addPart(e) {
-            this.$.addMenu.close();
-            this.$.addNewPart.open();
-        }
-
-        createNewPart() {
-            var newPostKey = firebase.database().ref().child('parts').push().key;
-
-            var updates = {};
-            updates['/parts/' + newPostKey] = this.newPart;
-
-            firebase.database().ref().update(updates);
-            this.newPart = {};
-        }
-
-        addCustomer(e) {
-            this.$.addMenu.close();
-            this.$.addNewCustomer.open();
-        }
-
-        createNewCustomer() {
-            var newPostKey = firebase.database().ref().child('customers').push().key;
-
-            var updates = {};
-            updates['/customers/' + newPostKey] = this.newCust;
-
-            firebase.database().ref().update(updates);
-            this.newCust = {};
-        }
-
-        connectedCallback() {
-            super.connectedCallback();
-            console.log('container', this.shadowRoot.querySelector("#qrcode"))
-            this.qrcode = new QRCode(this.shadowRoot.querySelector("#qrcode"), {
-                text: "http://jindo.dev.naver.com/collie",
-                width: 128,
-                height: 128,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            this.qrcode.clear(); // clear the code.
-            // qrcode.makeCode("http://naver.com"); // make another code.
-        }
-
-
-        _specificationsChnages() {
-
-            if (this.qrcode) {
-                this.qrcode.makeCode(JSON.stringify(this.specifications));
             }
 
 
+            setUpPage(objectArray, tableId, pageSize, pageNumber) {
+
+                var dataTable = this.shadowRoot.querySelector('#' + tableId);
+                var startIndex = pageNumber * pageSize;
+                var endIndex = startIndex + pageSize;
+                endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+                var objectsOnPage = objectArray.slice(startIndex, endIndex);
+                dataTable.set('data', objectsOnPage);
+                dataTable.set('availableSize', [pageSize]);
+                dataTable.set('size', pageSize);
+                dataTable.set('totalPages', objectArray.length / pageSize);
+                // dataTable.set('page', 0);
+                dataTable.set('totalElements', objectArray.length);
+
+            }
+
+
+            addProduct(e) {
+                // this.$.addMenu.close();
+                this.$.addNewProduct.open();
+            }
+
+            createNewProduct() {
+                var newPostKey = firebase.database().ref().child('machines').push().key;
+
+                var updates = {};
+                updates['/machines/' + newPostKey] = this.newProduct;
+
+                firebase.database().ref().update(updates);
+                this.newProduct = {};
+            }
+
+
+            addPart(e) {
+                // this.$.addMenu.close();
+                this.$.addNewPart.open();
+            }
+
+            createNewPart() {
+                var newPostKey = firebase.database().ref().child('parts').push().key;
+
+                var updates = {};
+                updates['/parts/' + newPostKey] = this.newPart;
+
+                firebase.database().ref().update(updates);
+                this.newPart = {};
+            }
+
+            addCustomer(e) {
+                // this.$.addMenu.close();
+                this.$.addNewCustomer.open();
+            }
+
+            createNewCustomer() {
+                var newPostKey = firebase.database().ref().child('customers').push().key;
+
+                var updates = {};
+                updates['/customers/' + newPostKey] = this.newCust;
+
+                firebase.database().ref().update(updates);
+                this.newCust = {};
+            }
+
+            connectedCallback() {
+                super.connectedCallback();
+                console.log('container', this.shadowRoot.querySelector("#qrcode"))
+                this.qrcode = new QRCode(this.shadowRoot.querySelector("#qrcode"), {
+                    text: "http://jindo.dev.naver.com/collie",
+                    width: 128,
+                    height: 128,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                this.qrcode.clear(); // clear the code.
+                // qrcode.makeCode("http://naver.com"); // make another code.
+            }
+
+
+            _specificationsChnages() {
+
+                if (this.qrcode) {
+                    this.qrcode.makeCode(JSON.stringify(this.specifications));
+                }
+
+
+            }
+
         }
 
-    }
-
-    window.customElements.define(MyView2.is, MyView2);
+        window.customElements.define(MyView2.is, MyView2);
     </script>
 </dom-module>

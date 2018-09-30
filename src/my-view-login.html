@@ -10,6 +10,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+
 
 
 <dom-module id="my-view-login">
@@ -31,19 +36,30 @@ body {
 
 hgroup { 
   text-align:center;
-  margin-top: 4em;
+  margin-top: 1em;
 }
 
-h1, h3 { font-weight: 300; }
+h1, h3 {
+  margin: 0px; 
+  font-weight: 300; 
+  }
 
 h1 { color: #636363; }
+
+form h2 { 
+  color: #636363; 
+  margin: 0px; 
+  font-weight: 300;
+  text-align: center;
+  }
+
 
 h3 { color: #4a89dc; }
 
 form {
   width: 380px;
-  margin: 4em auto;
-  padding: 3em 2em 2em 2em;
+  margin: 1em auto;
+  padding: 1em 2em 1em 2em;
   background: #fafafa;
   border: 1px solid #ebebeb;
   box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
@@ -51,7 +67,7 @@ form {
 
 .group { 
   position: relative; 
-  margin-bottom: 45px; 
+  margin-bottom: 1em; 
 }
 
 input {
@@ -284,28 +300,120 @@ footer img:hover { opacity: .83; }
 
 footer img:focus , footer a:focus { outline: none; }
 
+img.logo{
+  height: 100px;
+  margin-bottom: 4em;
+}
+
+p.login-message {
+  text-align: center; font-size: small;
+}
+
+p span.login-error {
+  color: #dd2c00;
+}
+
+paper-button.custom {
+    --paper-button-ink-color: var(--paper-pink-a200);
+    /* These could also be individually defined for each of the
+      specific css classes, but we'll just do it once as an example */
+    --paper-button-flat-keyboard-focus: {
+      background-color: var(--paper-pink-a200);
+      color: white !important;
+    };
+    --paper-button-raised-keyboard-focus: {
+      background-color: var(--paper-pink-a200) !important;
+      color: white !important;
+    };
+  }
+  paper-button.custom:hover {
+    background-color: var(--paper-indigo-100);
+  }
+  paper-button.blue {
+    color: #4a89dc;
+
+  }
+
+  .sign-up-button{
+    width: 100%;
+    margin: 0px;
+    padding: 2px;
+    font-size: medium;
+    text-transform: none;
+  }
+
+  paper-dialog{
+    min-width: 30%;
+  }
+
     </style>
 
    <hgroup>
-  <h1>Service App</h1>
-  <h3>Pro Arc Welding & Cutting Systems Pvt. Ltd.</h3>
-</hgroup>
-<form>
-  <div class="group">
-      <paper-input label="Email" value="{{login.email}}"></paper-input>
+     <img class="logo" src="../images/manifest/proarc_logo-144.png" alt="">
+     <!-- <h3>Pro Arc Welding & Cutting Systems Pvt. Ltd.</h3> -->
+    </hgroup>
+
+    <iron-a11y-keys id="a11y" target="loginForm" keys="enter"
+                    on-keys-pressed="onLoginClick"></iron-a11y-keys>
+    <iron-form id="loginForm" on-iron-form-presubmit="onLoginClick" on-iron-form-invalid="onLoginFormError">
+      
+      <form>
+          <h2>Service App</h2>
+    <div class="group">
+        <paper-input disabled="{{loginInProgress}}" label="Email" value="{{login.email}}" type="email" error-message="Email is invalid" required></paper-input>
+      
+    </div>
+    <div class="group">
+                          <paper-input disabled="{{loginInProgress}}" type="password" label="Password" value="{{login.password}}" error-message="Invalid Password" required></paper-input>
+      
+    </div>
+    <button disabled="{{loginInProgress}}" type="submit" class="button buttonBlue" >Login
+      <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+    </button>
+
+    <paper-button on-tap="openCreateNewUserModal" class="custom blue sign-up-button">Sign Up</paper-button>
+    <paper-button on-tap="forgotPassword" class="custom blue sign-up-button">Forgot Password</paper-button>
     
-  </div>
-  <div class="group">
-                        <paper-input type="password" label="Password" value="{{login.password}}"></paper-input>
-    
-  </div>
-  <button type="button" class="button buttonBlue" on-click="onLoginClick">Login
-    <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
-  </button>
-</form>
+    <p class="login-message">
+        <template is="dom-if" if="{{!loginInProgress}}">
+       
+      <template is="dom-if" if="{{signInError}}">
+        <span class="login-error">Invalid credentials! Please try again.</span> 
+      </template>
+      </template>
+
+      <template is="dom-if" if="{{loginInProgress}}">
+          <span >Authenticating..</span> 
+        </template>
+      </p>
+  </form>
+</iron-form>
+<!-- on-click="onLoginClick" -->
 <!-- <footer><a href="http://www.polymer-project.org/" target="_blank"><img src="https://www.polymer-project.org/images/logos/p-logo.svg"></a>
   <p>You Gotta Love <a href="http://www.polymer-project.org/" target="_blank">Google</a></p>
 </footer> -->
+
+<paper-dialog id="createNewUserModal">
+  <h2>Create New User</h2>
+  <paper-dialog-scrollable>
+      <div class="container">
+          <paper-input value="{{newUser.name}}" label="Name"></paper-input>
+          <paper-input value="{{newUser.email}}" label="Email"></paper-input>
+          <div class="dialog-form-input-row">
+              <paper-input value="{{newUser.phone}}" label="Phone"></paper-input>
+          </div>
+          <paper-input value="{{newUser.password}}" label="Password" type="password" ></paper-input>
+          <paper-input value="{{newUser.confirmPassword}}" label="Confirm Password" type="password" ></paper-input>
+          
+      </div>
+  </paper-dialog-scrollable>
+  <div class="buttons">
+      <paper-button dialog-dismiss>Cancel</paper-button>
+      <paper-button on-tap="createNewUser" dialog-confirm autofocus>OK</paper-button>
+  </div>
+</paper-dialog>
+
+<paper-toast id="toast" text="{{toastMessage}}"></paper-toast>
   </template>
 
   <script>
@@ -319,6 +427,29 @@ footer img:focus , footer a:focus { outline: none; }
                     reflectToAttribute: true,
                     value: {}
                 },
+          
+                signInError: {
+                  type: Boolean,
+                  reflectToAttribute: true,
+                  value: false
+                },
+
+                loginInProgress: {
+                  type: Boolean,
+                  reflectToAttribute: true,
+                  value: false
+                },
+
+                newUser: {
+                  type: Object,
+                    reflectToAttribute: true,
+                    value: {}
+                },
+
+                toastMessage: {
+                  type:String,
+                  reflectToAttribute: true
+                },
 
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
@@ -326,16 +457,124 @@ footer img:focus , footer a:focus { outline: none; }
         };
       }
 
+      ready() {
+            super.ready();
+            console.log("my-view1 is ready", this.$.loginForm);
+        }
+
+        onLoginFormError(error){
+          console.log("The error is", error);
+
+        }
+
       onLoginClick(){
+        this.signInUser(this.login.email, this.login.password);
+      }
 
+      signInUser(email, password){
         console.log("onLoginClick", this.login);
+        this.loginInProgress = true;
+        
+        if(this.$.loginForm.validate()){
+          var signInPromise = firebase.auth().signInWithEmailAndPassword(email, password);
+          signInPromise.then((user)=>{
+            this.loginInProgress = false;
+            this.signInError = false; 
+            console.log('On signed in', user);
+            this.login = {
+              email: "",
+              password: ""
+            }
 
-        firebase.auth().signInWithEmailAndPassword(this.login.email, this.login.password).catch(function(error) {
+          });
+          signInPromise.catch((error) =>{
+            // Handle Errors here.
+            this.loginInProgress = false;            
+            this.signInError = true; 
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log('error');
+            // ...
+          });
+        }
+      }
+
+      openCreateNewUserModal(){
+        this.$.createNewUserModal.open();
+        
+      }
+
+      createNewUser(){
+        this.loginInProgress = true;        
+        var createNewUserPromise = firebase.auth().createUserWithEmailAndPassword(this.newUser.email, this.newUser.password);
+        createNewUserPromise.catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
-          console.log('error');
           // ...
+          this.loginInProgress = false;
+            this.signInError = false; 
+            console.log('On signed in', user);
+            this.login = {
+              email: "",
+              password: ""
+            }
+        });
+
+        createNewUserPromise.then((response)=>{
+          console.log('newUser', response);
+          localStorage.setItem('newRegisteredUser', JSON.stringify(
+            {
+              uid: response.user.uid,
+              name: this.newUser.name,
+              phone: this.newUser.phone,
+              email: this.newUser.email
+              
+              
+            } 
+          ));
+            // this.signInUser(this.newUser.email, this.newUser.password);
+        });
+      }
+
+      forgotPassword(){
+
+        if(!this.login.email){
+          this.toastMessage = "Please enter your email id";
+          this.$.toast.open();
+          return;
+        }
+
+        var actionCodeSettings = {
+          // URL you want to redirect back to. The domain (www.example.com) for this
+          // URL must be whitelisted in the Firebase Console.
+          // url: 'https://serviceapp-d9b7f.firebaseapp.com',
+          url: 'https://serviceapp-prod.firebaseapp.com',
+          // This must be true.
+          handleCodeInApp: true,
+          // iOS: {
+          //   bundleId: 'com.example.ios'
+          // },
+          // android: {
+          //   packageName: 'com.example.android',
+          //   installApp: true,
+          //   minimumVersion: '12'
+          // }
+        };
+
+        firebase.auth().sendPasswordResetEmail(this.login.email, actionCodeSettings)
+        .then(() =>{
+          // The link was successfully sent. Inform the user.
+          // Save the email locally so you don't need to ask the user for it again
+          // if they open the link on the same device.
+          // window.localStorage.setItem('emailForSignIn', email);
+          this.toastMessage = "You shall recieve an email on the given email id";
+          this.$.toast.open();
+        })
+        .catch((error) => {
+          // Some error occurred, you can inspect the code: error.code
+          this.toastMessage = "Invalid email";
+          this.$.toast.open();
         });
       }
     }

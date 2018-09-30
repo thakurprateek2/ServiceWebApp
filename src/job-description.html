@@ -43,109 +43,105 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             @apply(--layout-center-justified);
             width: 100%;
         }
+
+        .edit-icon {
+            color: #d81b60;
+            width: 16px;
+        }
         </style>
         <h2>Job Details</h2>
+        <modal-list-selector id="selectJobTypeModal" is-searchable="false" data-array="{{jobTypes}}" on-select="onJobTypeSelect" title="Change Job Type To"></modal-list-selector>
+        <modal-list-selector id="selectEngineerModal" on-select="onEngineerSelect" title="Change Engineers" table-name="engineers" item-name-field="name" item-description-field="email"></modal-list-selector>
+        <modal-list-selector id="selectCustomerModal" on-select="onCustomerSelect" title="Change Customer" table-name="customers" item-name-field="name" item-description-field="address"></modal-list-selector>
+        <modal-list-selector id="selectMachineModal" on-select="onMachineSelect" title="Change Machine" table-name="machines" item-name-field="name" item-description-field="name"></modal-list-selector>
         <div class="container flex-horizontal-with-ratios">
             <div class="flex2child">
-                <paper-listbox slot="dropdown-content">
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div secondary>Customer Name</div>
-                            <div>{{job.customer.name}}</div>
-                        </paper-item-body>
-                    </paper-item>
-                </paper-listbox>
+                <paper-item>
+                    <paper-item-body two-line on-tap="changeCustomer">
+                        <div secondary>Customer Name
+                            <iron-icon class="edit-icon" icon="icons:create"></iron-icon>
+                        </div>
+                        <div>{{customerName}}</div>
+                    </paper-item-body>
+                </paper-item>
             </div>
             <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div secondary>Job type</div>
-                            <div>{{job.jobType}}</div>
-                        </paper-item-body>
-                    </paper-item>
-                </paper-listbox>
+                <paper-item>
+                    <paper-item-body two-line on-tap="changeEngineer">
+                        <div secondary>Engineer
+                            <iron-icon class="edit-icon" icon="icons:create"></iron-icon>
+                        </div>
+                        <div>{{engineerName}}</div>
+                    </paper-item-body>
+                </paper-item>
             </div>
             <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div secondary>Machine</div>
-                            <div>{{job.machine.name}}</div>
-                        </paper-item-body>
-                    </paper-item>
-                </paper-listbox>
+                <paper-item>
+                    <paper-item-body two-line on-tap="changeMachine">
+                        <div secondary>Machine
+                            <iron-icon class="edit-icon" icon="icons:create"></iron-icon>
+                        </div>
+                        <div>{{machineName}}</div>
+                    </paper-item-body>
+                </paper-item>
             </div>
         </div>
         <div class="container flex-horizontal-with-ratios">
             <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div secondary>Address</div>
-                            <div>{{job.customer.address}}</div>
-                        </paper-item-body>
-                    </paper-item>
-                </paper-listbox>
+                <paper-item>
+                    <paper-item-body two-line>
+                        <div secondary>Address</div>
+                        <div>{{customerAddress}}</div>
+                    </paper-item-body>
+                </paper-item>
             </div>
             <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div secondary>Engineer</div>
-                            <div>{{job.engineer.first_name}} {{job.customer.last_name}}</div>
-                        </paper-item-body>
-                    </paper-item>
-                </paper-listbox>
+                <paper-item>
+                    <paper-item-body two-line on-tap="changeJobType">
+                        <div secondary>Job type
+                            <iron-icon class="edit-icon" icon="icons:create"></iron-icon>
+                        </div>
+                        <div>{{jobType}}</div>
+                    </paper-item-body>
+                </paper-item>
             </div>
         </div>
         <h2>Change Log</h2>
         <template is="dom-repeat" items="{{job.history}}" as="history">
-
-        <div class="container flex-horizontal-with-ratios">
-            <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
+            <div class="container flex-horizontal-with-ratios">
+                <div class="flexchild">
                     <paper-item>
                         <paper-item-body two-line>
                             <div secondary>Date</div>
                             <div>{{getFormatedDate(history.updateTime)}}</div>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
-            </div>
-            <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
+                </div>
+                <div class="flexchild">
                     <paper-item>
                         <paper-item-body two-line>
                             <div secondary>From Status</div>
                             <div>{{history.fromStatus}}</div>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
-            </div>
-            <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
+                </div>
+                <div class="flexchild">
                     <paper-item>
                         <paper-item-body two-line>
                             <div secondary>To Status</div>
                             <div>{{history.toStatus}}</div>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
-            </div>
-            <div class="flex2child">
-                <paper-listbox slot="dropdown-content">
+                </div>
+                <div class="flex2child">
                     <paper-item>
                         <paper-item-body two-line>
                             <div secondary>Notes</div>
                             <div style="max-width:400px;">{{history.notes}}</div>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
-            </div>
-
-            <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
+                </div>
+                <div class="flexchild">
                     <paper-item>
                         <paper-item-body two-line>
                             <div secondary>Attachment</div>
@@ -154,22 +150,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </a>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
-            </div>
-
-            <div class="flexchild">
-                <paper-listbox slot="dropdown-content">
+                </div>
+                <div class="flexchild">
                     <paper-item>
                         <paper-item-body two-line>
-                            <div secondary>Customer SIgnature</div>
+                            <div secondary>Customer Signature</div>
                             <a href="{{history.signatureImage}}" target="_blank">
                                 <img style="width:100px; height:100px; " src="{{history.signatureImage}}" alt="">
                             </a>
                         </paper-item-body>
                     </paper-item>
-                </paper-listbox>
+                </div>
             </div>
-        </div>
         </template>
     </template>
     <script>
@@ -180,18 +172,166 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return {
                 job: {
                     type: Object,
-                    reflectToAttribute: true
+                    reflectToAttribute: true,
+                    notify: true,
+                    observer: 'loadJobData'
+                },
+                jobTypes: {
+                    type: Array,
+                    value: ['Repair', 'Maintenance']
+                },
+                jobType: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true
+                },
+                engineerName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true
+                },
+                customerName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true
+                },
+                customerAddress: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true
+                },
+                machineName: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true
                 }
+
             }
         }
 
-        getFormatedDate(date){
-          console.log('getFormatedDate', date);
-          if(date){
-            return moment(date).format('ddd DD MMM YYYY h:mm a');
-          }else{
-            return "-- --- ---- -:-- -";
-          }
+        ready() {
+            super.ready();
+            // this.loadJobData();
+        }
+
+        getFormatedDate(date) {
+            console.log('getFormatedDate', date);
+            if (date) {
+                return moment(date).format('ddd DD MMM YYYY h:mm a');
+            } else {
+                return "-- --- ---- -:-- -";
+            }
+        }
+
+        loadJobData() {
+            this.jobType = this.job.jobType;
+            this.engineerName = this.job.engineer.name;
+            this.customerName = this.job.customer.name;
+            this.customerAddress = this.job.customer.address;
+            this.machineName = this.job.machine.name;
+        }
+
+        changeEngineer() {
+            this.$.selectEngineerModal.open();
+        }
+
+        changeCustomer() {
+            this.$.selectCustomerModal.open();
+        }
+
+        changeMachine() {
+            this.$.selectMachineModal.open();
+        }
+
+        changeJobType() {
+            this.$.selectJobTypeModal.set('isSearchable', false);
+            this.$.selectJobTypeModal.open();
+        }
+
+        onEngineerSelect(e) {
+            console.log("Engineer selected", e.detail);
+            this.selectedEngineer = e.detail;
+            this.engineerName = e.detail.name;
+            this.notifyJobModified('engineer', this.selectedEngineer);
+        }
+
+        onCustomerSelect(e) {
+            console.log("Customer selected", e.detail);
+            this.selectedCustomer = e.detail;
+            this.customerName = e.detail.name;
+            this.customerAddress = e.detail.address;
+            this.notifyJobModified('customer', this.selectedCustomer);
+
+        }
+
+        onMachineSelect(e) {
+            console.log("Machine selected", e.detail);
+            this.selectedMachine = e.detail;
+            this.machineName = e.detail.name;
+            this.notifyJobModified('machine', this.selectedMachine);
+
+        }
+
+        onJobTypeSelect(e) {
+            console.log("Job type selected", e.detail);
+            this.selectedJobType = e.detail;
+            this.jobType = e.detail;
+            this.notifyJobModified('jobType', this.selectedJobType);
+        }
+
+        notifyJobModified(field, value) {
+            this.dispatchEvent(new CustomEvent('job-modify', {
+                detail: {
+                    modifiedField: field,
+                    value: value
+                }
+            }));
+        }
+
+        updateJob() {
+            var updates = {};
+
+            if (this.selectedEngineer && (this.selectedEngineer.id != this.job.engineer.id)) {
+                //remove existing relations
+                updates['/jobs/' + this.job.id + '/engineer/' + this.job.engineer.id] = null;
+                updates['/engineers/' + this.job.engineer.id + '/jobs/' + this.job.id] = null;
+                // updates['/engineer_job/' + this.job.engineer.id + '/jobs/' + this.job.id] = null;
+
+                //Add new relations
+                // updates['/engineer_job/' + this.selectedEngineer.id + '/jobs/' + this.job.id] = true;
+                updates['/jobs/' + this.job.id + '/engineer/' + this.selectedEngineer.id] = {
+                    'name': this.selectedEngineer.name,
+                    'id': this.selectedEngineer.id,
+                    'email': this.selectedEngineer.email,
+                    'mobile': this.selectedEngineer.mobile
+                };
+
+            }
+
+            if(this.selectedCustomer){
+                updates['/jobs/' + this.job.id + '/customer/' ] = this.selectedCustomer;
+            }
+
+            if(this.selectedMachine){
+                updates['/jobs/' + this.job.id + '/machine/' ] = this.selectedMachine;
+            }
+
+            if(this.selectedJobType){
+                updates['/jobs/' + this.job.id + '/jobType/' ] = this.selectedJobType;
+            }
+
+            //Update job in engineer
+            updates['/engineers/' + (this.selectedEngineer ? this.selectedEngineer.id : this.job.engineer.id) +
+                    '/jobs/' + this.job.id] = {
+                    id: this.job.id,
+                    machine: this.selectedMachine ? this.selectedMachine : this.job.machines,
+                    customer: this.selectedCustomer ? this.selectedCustomer : this.job.customer,
+                    name: this.selectedEngineer ? this.selectedEngineer.name : this.job.engineer.name,
+                    jobType: this.selectedJobType ? this.selectedJobType : this.job.jobType,
+                    status: this.job.status
+                };
+
+            return firebase.database().ref().update(updates);
         }
     }
 

@@ -1,0 +1,88 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<dom-module id="engineer-description">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+
+            padding: 10px;
+        }
+
+        .flex-horizontal-with-ratios {
+            @apply --layout-horizontal;
+        }
+
+        .flexchild {
+            @apply --layout-flex;
+        }
+
+        .flex2child {
+            @apply --layout-flex-2;
+        }
+
+        .flex3child {
+            @apply --layout-flex-3;
+        }
+
+        .flex6child {
+            @apply --layout-flex-6;
+        }
+
+        .centered-box {
+            @apply(--layout-horizontal);
+            @apply(--layout-center-justified);
+            width: 100%;
+        }
+        </style>
+        <h2>Engineer Details</h2>
+
+                    <paper-input id="enggName" label="Name" value="[[engineer.name]]"></paper-input>
+                    <paper-item-body two-line>
+                            <div secondary>Email</div>
+                            <div>{{engineer.email}}</div>
+                        </paper-item-body>
+                    <paper-input id="enggMobile" label="Phone number" value="[[engineer.mobile]]"></paper-input>
+    </template>
+    <script>
+    class EnggDesc extends Polymer.Element {
+        static get is() { return 'engineer-description'; }
+
+        static get properties() {
+            return {
+                engineer: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    observer:'onEngineerChanged'
+                }
+            }
+        }
+
+        onEngineerChanged(engineer){
+          console.log('onEngineerChanged', engineer);
+            
+          
+        }
+
+        update(){
+            var name =  this.shadowRoot.querySelector("#enggName").value;
+            var mobile =  this.shadowRoot.querySelector("#enggMobile").value;
+            var updates = {};
+            updates['/engineers/' + this.engineer.id + '/name/'] = name;
+            updates['/engineers/' + this.engineer.id + '/mobile/'] = mobile;
+            firebase.database().ref().update(updates);
+        }
+    }
+
+    window.customElements.define(EnggDesc.is, EnggDesc);
+    </script>
+</dom-module>

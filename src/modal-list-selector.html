@@ -1,0 +1,151 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<dom-module id="modal-list-selector">
+    <template>
+        <style include="shared-styles">
+         :host {
+            display: block;
+        }
+        </style>
+        <paper-dialog id="selectModal" on-iron-overlay-closed="onClose">
+            <h2>{{title}}</h2>
+        <template is="dom-if" if="{{isSearchable}}">
+            <paper-input value="{{searchQuery}}" label="Search"></paper-input>
+        </template>
+            <paper-dialog-scrollable>
+                <div class="container">
+                    <paper-listbox slot="dropdown-content">
+                        <template is="dom-repeat" items="{{dataArray}}" as="item">
+                            <paper-item label="{{getItemName(item)}}" obj="{{item}}" on-tap="onItemSelect">
+                                <paper-item-body two-line>
+                                    <div>{{getItemName(item)}}</div>
+                                    <template is="dom-if" if="{{itemDescriptionField}}">
+                                        <div secondary>{{getItemDescription(item)}}</div>
+                                    </template>
+                                </paper-item-body>
+                            </paper-item>
+                        </template>
+                    </paper-listbox>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+    class ModalListSelector extends Polymer.Element {
+        static get is() { return 'modal-list-selector'; }
+
+        static get properties() {
+            return {
+                title: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+
+                isSearchable: {
+                    type: Boolean,
+                    reflectToAttribute: true,
+                    notify:true,
+                    value:true
+                },
+
+                tableName: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+                dataArray: {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: []
+                },
+                itemNameField: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+                itemDescriptionField: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+                searchQuery:{
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                    value: '',
+                    observer: 'loadData'
+
+                }
+            }
+        }
+
+        ready() {
+            console.log('Modal List ready', this.title, this.tableName, this.dataArray, this.itemNameField, this.itemDescriptionField);
+            super.ready();
+        }
+
+        loadData() {
+            if(this.tableName){                
+                var dataArrayRef = firebase.database().ref('/' + this.tableName + '/');
+                var serachQuerryRef =  dataArrayRef.orderByChild(this.itemNameField).startAt(this.searchQuery).endAt(this.searchQuery + "\uf8ff");
+                serachQuerryRef.on('value', (snap) => {
+                    this.set('dataArray', []);
+                    snap.forEach((childSnapshot) => {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        // ...
+                        childData.id = childKey;
+                        this.push('dataArray', childData);
+                    });
+
+                });
+            }
+        }
+
+
+        getItemName(data) {
+            if(this.itemNameField){
+                return data[this.itemNameField];
+            }else{
+                return data;
+            }
+        }
+
+        getItemDescription(data) {
+            return data[this.itemDescriptionField];
+        }
+
+        open() {
+            this.$.selectModal.open();
+        }
+
+        close() {
+            this.$.selectModal.close();
+        }
+
+        onClose(){
+            this.set('searchQuery', '');
+        }
+
+        onItemSelect(e){
+            // debugger;
+            console.log('Selected item', e.currentTarget.obj);
+            this.dispatchEvent(new CustomEvent('select', {detail: e.currentTarget.obj}));
+            this.close();
+        }
+
+    }
+
+    window.customElements.define(ModalListSelector.is, ModalListSelector);
+    </script>
+</dom-module>

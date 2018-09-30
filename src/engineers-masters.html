@@ -18,105 +18,253 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="engineers-masters">
     <template>
         <style include="shared-styles">
-         :host {
-            display: block;
+            :host {
+                display: block;
 
-            padding: 10px;
-        }
+                padding-top: 100px;
 
-        paper-checkbox {
-            margin-right: 20px;
-            padding: 10px;
-        }
+            }
 
-        .vertical-scroll {
-            overflow-y: scroll;
-        }
+            paper-checkbox {
+                margin-right: 20px;
+                padding: 10px;
+            }
 
-        .flex-horizontal-with-ratios {
-            @apply --layout-horizontal;
-        }
+            .vertical-scroll {
+                overflow-y: scroll;
+            }
 
-        .flexchild {
-            @apply --layout-flex;
-        }
+            .flex-horizontal-with-ratios {
+                @apply --layout-horizontal;
+            }
 
-        .flex2child {
-            @apply --layout-flex-2;
-        }
+            .flexchild {
+                @apply --layout-flex;
+            }
 
-        .flex3child {
-            @apply --layout-flex-3;
-        }
+            .flex2child {
+                @apply --layout-flex-2;
+            }
 
-        .flex6child {
-            @apply --layout-flex-6;
-        }
+            .flex3child {
+                @apply --layout-flex-3;
+            }
 
-        .list-container {
-            position: fixed;
-            width: 100%;
-            /* overflow: hidden; */
-            height: 80%;
-        }
+            .flex6child {
+                @apply --layout-flex-6;
+            }
 
-        .teamDropDown {
-            margin-left: 24px;
-        }
+            .list-container {
+                position: fixed;
+                width: 100%;
+                /* overflow: hidden; */
+                height: calc(100% - 66px - 100px);
+            }
 
-        .modalCard {
-            margin: 20px;
-        }
+            .teamDropDown {
+                margin-left: 24px;
+            }
 
-        .row-remove {
-            background: #E6E6E6;
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 3px;
-        }
+            .modalCard {
+                margin: 20px;
+            }
 
-        paper-fab {
-            z-index: 1;
-        }
+            .row-remove {
+                background: #E6E6E6;
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 3px;
+            }
+
+            .row-edit {
+                background: #E6E6E6;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                padding: 3px;
+            }
+
+            .sub-header {
+                position: fixed;
+                top: 64px;
+                display: table;
+                height: 80px;
+                width: 100%;
+                z-index: 5;
+                max-height: 80px;
+            }
+
+            .sub-header>div {
+                display: table-cell;
+                vertical-align: middle;
+            }
+
+            .sub-header.card {
+                padding: 7px;
+                margin: 0px;
+                border-radius: 0px;
+                background: #FBFBFB;
+            }
+
+            .sub-header .title {
+                font-size: larger;
+                padding-left: 30px;
+                /* padding: 0px; */
+                margin: 0px;
+                font-weight: 400;
+                color: var(--app-primary-color)
+            }
+
+            .flex-container {
+                align-items: center;
+                display: flex;
+                -webkit-flex-direction: row;
+                /* Safari */
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .flex-container>.menu-items {
+                display: flex;
+                -webkit-flex-direction: row-reverse;
+                /* Safari */
+                flex-direction: row-reverse;
+                padding-right: 60px;
+            }
+
+            .menu-items div {
+                padding-right: 10px;
+            }
+
+            .menu-items div.button-container {
+                display: flex;
+                align-items: center;
+            }
+
+            p.label {
+                font-style: italic;
+                text-align: right;
+                font-size: small;
+                padding-top: 10px;
+            }
+
+            paper-button {
+                font-family: 'Roboto', 'Noto', sans-serif;
+                font-weight: normal;
+                font-size: 14px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            paper-button.dark {
+                background-color: var(--paper-grey-900);
+                color: white;
+            }
+
+            paper-button.disabled {
+                color: white;
+            }
+
+            div.team-details{
+                color: var(--app-primary-color);
+                font-size: small;
+            }
+
+            div.team-details span{
+                color: var(--app-primary-color);
+                font-size: small;
+                padding-right: 10px;
+            }
+
+
+            paper-fab {
+                z-index: 1;
+            }
         </style>
-        <div class="flex-horizontal-with-ratios">
-            <div class="flexchild">
-                <paper-dropdown-menu class="teamDropDown" label="Select Team" on-selected-item-changed="teamSelected">
-                    <paper-listbox slot="dropdown-content">
-                        <template is="dom-repeat" items="{{teams}}" as="team">
-                            <paper-item label="{{team.name}}" obj="{{team}}">
-                                <paper-item-body two-line>
-                                    <div>{{team.name}}</div>
-                                    <div secondary>{{team.admin.name}}</div>
-                                </paper-item-body>
-                            </paper-item>
-                        </template>
-                    </paper-listbox>
-                </paper-dropdown-menu>
-            </div>
-            <div class="flex3child">
-                <template is="dom-if" if="{{selectedTeam.id}}">
-                    <span>Team Size {{engineers.length}}</span>
-                    <paper-button on-tap="openAddEngineerModal" raised noink>Add Engineer</paper-button>
-                    <span>Admin: <b>{{selectedTeam.admin.name}}</b></span>
-                    <span>Phone: <b>{{selectedTeam.admin.mobile}}</b></span>
-                </template>
+
+        <div class="sub-header card">
+            <div>
+                <div class="flex-container">
+                    <div>
+                        <p class="title">Engineers</p>
+                    </div>
+                    <div class="menu-items">
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="openImportModal">Import Excel</paper-button>
+                        </div>
+                        <!-- <div class="button-container">
+                            <paper-button class="dark" on-tap="addCustomer">Add Engineer</paper-button>
+                        </div> -->
+
+                        <div class="button-container">
+                            <paper-button class="dark" on-tap="addTeam">Add Team</paper-button>
+                        </div>
+                        
+                        <div>
+                            <paper-dropdown-menu class="teamDropDown" label="Select Team" on-selected-item-changed="teamSelected">
+                                <paper-listbox slot="dropdown-content">
+                                    <template is="dom-repeat" items="{{teams}}" as="team">
+                                        <paper-item label="{{team.name}}" obj="{{team}}">
+                                            <paper-item-body two-line>
+                                                <div>{{team.name}}</div>
+                                                <div secondary>{{team.admin.name}}</div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </paper-dropdown-menu>
+                        </div>
+
+                        <div class="button-container team-details">
+                                <template is="dom-if" if="{{selectedTeam.id}}">
+                                        <span>Team Size {{engineers.length}}</span>
+                                        <span>Admin:
+                                            <b>{{selectedTeam.admin.name}}</b>
+                                        </span>
+                                        <span>Phone:
+                                            <b>{{selectedTeam.admin.mobile}}</b>
+                                        </span>
+                                        <paper-button on-tap="openAddEngineerModal" raised noink class="dark">Add Member</paper-button>
+                                    </template>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <paper-dialog id="engineerDetailsDialog">
+            <paper-dialog-scrollable>
+                <engineer-description id="enggDescription" engineer="{{selectedEngineer}}">
+                </engineer-description>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button on-tap="updateEngineer" dialog-dismiss>Save Changes</paper-button>
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+        <!-- <div class="flex-horizontal-with-ratios">
+            <div class="flex3child">
+                
+            </div>
+        </div> -->
         <div class="list-container flex-horizontal-with-ratios">
             <div class="flexchild vertical-scroll">
                 <iron-list scroll-target="job-list">
                     <div id="job-list">
                         <template is="dom-repeat" items="{{engineers}}" as="engineer">
-                            <paper-item class="card" label="{{engineer.name}}" obj="{{engineer}}" on-tap="showJob">
+                            <paper-item class="card" label="{{engineer.name}}" obj="{{engineer}}" on-tap="showEngineer">
+                                <div on-tap="onLocateTap" class="row-edit">
+                                    <iron-icon icon="maps:place"></iron-icon>
+                                </div>
+                                <template is="dom-if" if="{{selectedTeam.id}}">
+                                    <div on-tap="onRemoveTap" class="row-remove">
+                                        <iron-icon icon="icons:close"></iron-icon>
+                                    </div>
+                                </template>
                                 <paper-item-body two-line>
-                                    <template is="dom-if" if="{{selectedTeam.id}}">
-                                        <div on-tap="onRemoveTap" class="row-remove">
-                                            <iron-icon icon="icons:close"></iron-icon>
-                                        </div>
-                                    </template>
-                                    <div><b>{{engineer.name}}</b></div>
+                                    <div>
+                                        <b>{{engineer.name}}</b>
+                                    </div>
                                     <div secondary>{{engineer.email}}</div>
                                 </paper-item-body>
                             </paper-item>
@@ -129,11 +277,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </google-map>
             </div>
         </div>
-        <paper-fab-speed-dial id="addMenu" with-backdrop>
+         <!-- <paper-fab-speed-dial id="addMenu" with-backdrop>
             <paper-fab-speed-dial-action on-tap="openImportModal" icon="icons:dns">Import</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="addCustomer" icon="icons:account-circle">Add Engineer</paper-fab-speed-dial-action>
             <paper-fab-speed-dial-action on-tap="addTeam" icon="icons:account-circle">Add Team</paper-fab-speed-dial-action>
-        </paper-fab-speed-dial>
+        </paper-fab-speed-dial>  -->
         <paper-dialog id="removeEngineerModal">
             <h2>Remove {{engineerToRemove.name}} from team {{selectedTeam.name}} ?</h2>
             <div class="buttons">
@@ -148,7 +296,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <template is="dom-repeat" items="{{engineersToAdd}}" as="engineer">
                         <paper-item class="card modalCard" label="{{engineer.name}}" obj="{{engineer}}" on-tap="addEngineerToTeam">
                             <paper-item-body two-line>
-                                <div><b>{{engineer.name}}</b></div>
+                                <div>
+                                    <b>{{engineer.name}}</b>
+                                </div>
                                 <div secondary>{{engineer.email}}</div>
                             </paper-item-body>
                         </paper-item>
@@ -239,202 +389,171 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p> -->
     </template>
     <script>
-    class EngineersMasters extends ExcelImport(Polymer.Element) {
-        static get is() { return 'engineers-masters'; }
-        static get properties() {
-            return {
-                engineers: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: []
-                },
+        class EngineersMasters extends ExcelImport(Polymer.Element) {
+            static get is() { return 'engineers-masters'; }
+            static get properties() {
+                return {
+                    engineers: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
 
-                engineersToAdd: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: []
-                },
+                    engineersToAdd: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
 
-                teams: {
-                    type: Array,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: []
-                },
+                    teams: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
 
-                tableName: {
-                    type: String,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: "engineers"
-                },
+                    tableName: {
+                        type: String,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: "engineers"
+                    },
 
-                newTeam: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: {}
-                },
+                    newTeam: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: {}
+                    },
 
-                selectedTeam: {
-                    type: Object,
-                    reflectToAttribute: true,
-                    notify: true,
-                    value: { 'name': 'All' },
-                    observer: '_onSelectedTeamChange'
+                    selectedTeam: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: { 'name': 'All' },
+                        observer: '_onSelectedTeamChange'
+                    },
+
+                    selectedEngineer: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        notify: true
+                    }
                 }
             }
-        }
 
-        connectedCallback() {
-            super.connectedCallback();
-            this.loadData();
+            connectedCallback() {
+                super.connectedCallback();
+                this.loadData();
 
-            console.log('importListPageSize', this.importListPageSize);
-        }
-
-        openImportModal(e) {
-            this.$.addMenu.close();
-            this.$.importEngineerModal.open();
-        }
-
-        addTeam() {
-            this.$.addMenu.close();
-            this.$.addTeamModal.open();
-        }
-
-        //Excel behaviour implemented methods start
-
-        checkElementExists(element, callback) {
-            element.uploadStatus = "Checking"
-            this.setUpPage(this.importedElements, 'importEnggListTable', this.importListPageSize, this.elementListPage);
-            firebase.database().ref().child(this.tableName)
-                .orderByChild("mobile").equalTo(element.mobile)
-                .once('value', (snap) => {
-                    console.log("Result", snap, snap.key, snap.val());
-                    callback(snap.exists());
-                });
-            // setTimeout(()=>{callback(true)}, 1000)
-        }
-
-        createNewElement(element, callback) {
-            var newElement = {
-                "name": element.name,
-                "alternateMobile": element.alternateMobile,
-                "email": element.email,
-                "mobile": element.mobile,
-                "address": element.address,
-                "localAddress": element.localAddress,
-                "rights": {
-                    admin: false,
-                    assign_jobs: false,
-                    create_jobs: false,
-                    masters: false,
-                    update_jobs: true
-                }
-
+                console.log('importListPageSize', this.importListPageSize);
             }
 
-            var newPostKey = firebase.database().ref().child('engineers').push().key;
-            var updates = {};
-            updates['/engineers/' + newPostKey] = newElement;
-
-            newElement.id = newPostKey;
-
-            firebase.database().ref().update(updates);
-            newElement = {};
-            callback();
-
-        }
-
-        getTransformationMap() {
-            return {
-                "Alternative Mob. No.": "alternateMobile",
-                "Email ID": "email",
-                "Local Address": "localAddress",
-                "Mobile Number": "mobile",
-                "Name": "name",
-                "Peremanat Address": "address"
-            }
-        }
-
-        getImportDialogId() {
-            return 'importEngineerModal';
-        }
-
-        getElementTableId() {
-            return 'importEnggListTable';
-        }
-        //Excel behaviour implemented methods end
-
-
-        _onSelectedTeamChange() {
-
-            if (this.enggListRef) {
-                this.enggListRef.off();
+            openImportModal(e) {
+                // this.$.addMenu.close();
+                this.$.importEngineerModal.open();
             }
 
-            window.enggMap = this.shadowRoot.querySelector("#engineerMap");
-
-            /*window.enggMap.latitude= this.selectedCustomer.latitude; 
-            window.enggMap.longitude=this.selectedCustomer.longitude;*/
-
-            this.shadowRoot.querySelector("#engineerMap").resize();
-
-            this.enggListRef = firebase.database().ref('/engineers/');
-            if (this.selectedTeam.id) {
-                this.enggListRef = this.enggListRef
-                    .orderByChild('teams/' + this.selectedTeam.id)
-                    .equalTo(true)
+            addTeam() {
+                // this.$.addMenu.close();
+                this.$.addTeamModal.open();
             }
 
-            this.enggListRef.on('value', (snap) => {
-                this.set('engineers', []);
-                if (this.markers) {
-                    this.markers.forEach((m) => {
-                        m.setMap(null);
+            //Excel behaviour implemented methods start
+
+            checkElementExists(element, callback) {
+                element.uploadStatus = "Checking"
+                this.setUpPage(this.importedElements, 'importEnggListTable', this.importListPageSize, this.elementListPage);
+                firebase.database().ref().child(this.tableName)
+                    .orderByChild("mobile").equalTo(element.mobile)
+                    .once('value', (snap) => {
+                        console.log("Result", snap, snap.key, snap.val());
+                        callback(snap.exists());
                     });
-                }
-                this.markers = [];
-                snap.forEach((childSnapshot) => {
-                    var childKey = childSnapshot.key;
-                    var childData = childSnapshot.val();
-                    // ...
-                    childData.id = childKey;
-                    this.push('engineers', childData);
+                // setTimeout(()=>{callback(true)}, 1000)
+            }
 
-                    if (childData.latitude && childData.longitude) {
-                        var enggLocation = new google.maps.LatLng(childData.latitude, childData.longitude);
-                        var marker = new google.maps.Marker({
-                            position: enggLocation,
-                            map: window.enggMap.map
-                        });
-                        this.markers.push(marker);
-
+            createNewElement(element, callback) {
+                var newElement = {
+                    "name": element.name,
+                    "alternateMobile": element.alternateMobile,
+                    "email": element.email,
+                    "mobile": element.mobile,
+                    "address": element.address,
+                    "localAddress": element.localAddress,
+                    "rights": {
+                        admin: false,
+                        assign_jobs: false,
+                        create_jobs: false,
+                        masters: false,
+                        update_jobs: true
                     }
 
-                });
-
-                var bounds = new google.maps.LatLngBounds();
-                for (var i = 0; i < this.markers.length; i++) {
-                    bounds.extend(this.markers[i].getPosition());
                 }
 
-                window.enggMap.map.fitBounds(bounds);
+                var newPostKey = firebase.database().ref().child('engineers').push().key;
+                var updates = {};
+                updates['/engineers/' + newPostKey] = newElement;
+
+                newElement.id = newPostKey;
+
+                firebase.database().ref().update(updates);
+                newElement = {};
+                callback();
+
+            }
+
+            getTransformationMap() {
+                return {
+                    "Alternative Mob. No.": "alternateMobile",
+                    "Email ID": "email",
+                    "Local Address": "localAddress",
+                    "Mobile Number": "mobile",
+                    "Name": "name",
+                    "Peremanat Address": "address"
+                }
+            }
+
+            getImportDialogId() {
+                return 'importEngineerModal';
+            }
+
+            getElementTableId() {
+                return 'importEnggListTable';
+            }
+            //Excel behaviour implemented methods end
 
 
-            });
-        }
+            _onSelectedTeamChange() {
 
+                if (this.enggListRef) {
+                    this.enggListRef.off();
+                }
 
-        loadData() {
+                window.enggMap = this.shadowRoot.querySelector("#engineerMap");
 
+                /*window.enggMap.latitude= this.selectedCustomer.latitude; 
+                window.enggMap.longitude=this.selectedCustomer.longitude;*/
 
-            /*firebase.database().ref('/engineers/')
-                .on('value', (snap) => {
+                this.shadowRoot.querySelector("#engineerMap").resize();
+
+                this.enggListRef = firebase.database().ref('/engineers/');
+                if (this.selectedTeam.id) {
+                    this.enggListRef = this.enggListRef
+                        .orderByChild('teams/' + this.selectedTeam.id)
+                        .equalTo(true)
+                }
+
+                this.enggListRef.on('value', (snap) => {
                     this.set('engineers', []);
+                    if (this.markers) {
+                        this.markers.forEach((m) => {
+                            m.setMap(null);
+                        });
+                    }
+                    this.markers = [];
                     snap.forEach((childSnapshot) => {
                         var childKey = childSnapshot.key;
                         var childData = childSnapshot.val();
@@ -442,191 +561,241 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         childData.id = childKey;
                         this.push('engineers', childData);
 
-                        
+                        if (childData.latitude && childData.longitude) {
+                            var enggLocation = new google.maps.LatLng(childData.latitude, childData.longitude);
+                            var marker = new google.maps.Marker({
+                                position: enggLocation,
+                                map: window.enggMap.map
+                            });
+                            this.markers.push(marker);
+
+                        }
 
                     });
-                });*/
 
-            firebase.database().ref('/teams/')
-                .on('value', (snap) => {
-                    this.set('teams', [this.selectedTeam]);
+                    var bounds = new google.maps.LatLngBounds();
+                    for (var i = 0; i < this.markers.length; i++) {
+                        bounds.extend(this.markers[i].getPosition());
+                    }
+
+                    window.enggMap.map.fitBounds(bounds);
+
+
+                });
+            }
+
+
+            loadData() {
+
+
+                /*firebase.database().ref('/engineers/')
+                    .on('value', (snap) => {
+                        this.set('engineers', []);
+                        snap.forEach((childSnapshot) => {
+                            var childKey = childSnapshot.key;
+                            var childData = childSnapshot.val();
+                            // ...
+                            childData.id = childKey;
+                            this.push('engineers', childData);
+    
+                            
+    
+                        });
+                    });*/
+
+                firebase.database().ref('/teams/')
+                    .on('value', (snap) => {
+                        this.set('teams', [this.selectedTeam]);
+                        snap.forEach((childSnapshot) => {
+                            var childKey = childSnapshot.key;
+                            var childData = childSnapshot.val();
+                            // ...
+                            childData.id = childKey;
+                            this.push('teams', childData);
+
+
+                        });
+                    });
+            }
+
+            openAddEngineerModal() {
+
+
+                var enggToAddListRef = firebase.database().ref('/engineers/')
+                    .orderByChild('teams/' + this.selectedTeam.id).startAt(null)
+                    .endAt(false);
+
+
+                enggToAddListRef.once('value', (snap) => {
+                    this.set('engineersToAdd', []);
                     snap.forEach((childSnapshot) => {
                         var childKey = childSnapshot.key;
                         var childData = childSnapshot.val();
                         // ...
                         childData.id = childKey;
-                        this.push('teams', childData);
+                        this.push('engineersToAdd', childData);
+
+                        /*if(childData.first_name){
+                            this.fixTheEnginner(childKey, childData);
+                        }*/
+                        this.$.addEngineerModal.open();
 
 
                     });
                 });
-        }
+                // this.$.addEngineerModal.open();
+            }
 
-        openAddEngineerModal() {
+            addEngineerToTeam(e) {
+                console.log('addEngineerToTeam', e.model.__data.engineer);
+                var selectedEngineer = e.model.__data.engineer;
+                var updates = {};
+                updates['/engineers/' + selectedEngineer.id + '/teams/' + this.selectedTeam.id] = true;
 
-
-            var enggToAddListRef = firebase.database().ref('/engineers/')
-                .orderByChild('teams/' + this.selectedTeam.id).startAt(null)
-                .endAt(false);
-
-
-            enggToAddListRef.once('value', (snap) => {
+                firebase.database().ref().update(updates);
+                this.$.addEngineerModal.close();
                 this.set('engineersToAdd', []);
-                snap.forEach((childSnapshot) => {
-                    var childKey = childSnapshot.key;
-                    var childData = childSnapshot.val();
-                    // ...
-                    childData.id = childKey;
-                    this.push('engineersToAdd', childData);
-
-                    /*if(childData.first_name){
-                        this.fixTheEnginner(childKey, childData);
-                    }*/
-                    this.$.addEngineerModal.open();
-
-
-                });
-            });
-            // this.$.addEngineerModal.open();
-        }
-
-        addEngineerToTeam(e) {
-            console.log('addEngineerToTeam', e.model.__data.engineer);
-            var selectedEngineer = e.model.__data.engineer;
-            var updates = {};
-            updates['/engineers/' + selectedEngineer.id + '/teams/' + this.selectedTeam.id] = true;
-
-            firebase.database().ref().update(updates);
-            this.$.addEngineerModal.close();
-            this.set('engineersToAdd', []);
-        }
-
-        /*fixTheEnginner(engineerKey, enginneer){
-            var newEngg = {};
-
-            for (var key in enginneer) {
-                    if (enginneer[key] && key != 'first_name' && key != 'last_name') {
-                        newEngg[key] = enginneer[key];
-                    }
             }
 
-            newEngg.name = enginneer.first_name + " " + enginneer.last_name;
+            /*fixTheEnginner(engineerKey, enginneer){
+                var newEngg = {};
+    
+                for (var key in enginneer) {
+                        if (enginneer[key] && key != 'first_name' && key != 'last_name') {
+                            newEngg[key] = enginneer[key];
+                        }
+                }
+    
+                newEngg.name = enginneer.first_name + " " + enginneer.last_name;
+    
+    
+                var updates = {};
+                updates['/engineers/' + engineerKey] = newEngg;
+    
+                firebase.database().ref().update(updates);
+                newEngg = {};
+    
+            }*/
 
 
-            var updates = {};
-            updates['/engineers/' + engineerKey] = newEngg;
 
-            firebase.database().ref().update(updates);
-            newEngg = {};
+            onAccessChanged(e) {
+                console.log("onAccessChanged", e);
+                setTimeout(() => {
+                    var updated = e.model.__data.engineer;
+                    console.log("updated", updated);
 
-        }*/
+                    firebase.database().ref('/engineers/' + updated.id).set(updated).then(function (snapshot) {
+                        console.log("After Update", snapshot);
+                    }, 0);
 
-
-
-        onAccessChanged(e) {
-            console.log("onAccessChanged", e);
-            setTimeout(() => {
-                var updated = e.model.__data.engineer;
-                console.log("updated", updated);
-
-                firebase.database().ref('/engineers/' + updated.id).set(updated).then(function(snapshot) {
-                    console.log("After Update", snapshot);
-                }, 0);
-
-            })
-        }
-
-        setUpPage(objectArray, tableId, pageSize, pageNumber) {
-
-            var dataTable = this.shadowRoot.querySelector('#' + tableId);
-            if (!dataTable || !dataTable.set) {
-                console.warn('Table element or its polymer element not found!');
-                return;
-            }
-            var startIndex = pageNumber * pageSize;
-            var endIndex = startIndex + pageSize;
-            endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
-
-            var objectsOnPage = objectArray.slice(startIndex, endIndex);
-            dataTable.set('data', objectsOnPage);
-            dataTable.set('availableSize', [pageSize]);
-            dataTable.set('size', pageSize);
-            dataTable.set('totalPages', objectArray.length / pageSize);
-            // dataTable.set('page', 0);
-            dataTable.set('totalElements', objectArray.length);
-
-        }
-
-        engineerSelected(e) {
-
-            console.log('engineerSelected', e);
-            if (e.detail && e.detail.value) {
-                var selectedEngineer = e.detail.value.obj;
-                console.log('selectedEngineer', selectedEngineer);
-                this.newTeam.admin = {
-                    'engineerId': selectedEngineer.id,
-                    'name': selectedEngineer.name,
-                    'mobile': selectedEngineer.mobile,
-                    'email': selectedEngineer.email
-                };
+                })
             }
 
-        }
+            setUpPage(objectArray, tableId, pageSize, pageNumber) {
+
+                var dataTable = this.shadowRoot.querySelector('#' + tableId);
+                if (!dataTable || !dataTable.set) {
+                    console.warn('Table element or its polymer element not found!');
+                    return;
+                }
+                var startIndex = pageNumber * pageSize;
+                var endIndex = startIndex + pageSize;
+                endIndex = objectArray.length <= endIndex ? objectArray.length : endIndex;
+
+                var objectsOnPage = objectArray.slice(startIndex, endIndex);
+                dataTable.set('data', objectsOnPage);
+                dataTable.set('availableSize', [pageSize]);
+                dataTable.set('size', pageSize);
+                dataTable.set('totalPages', objectArray.length / pageSize);
+                // dataTable.set('page', 0);
+                dataTable.set('totalElements', objectArray.length);
+
+            }
+
+            engineerSelected(e) {
+
+                console.log('engineerSelected', e);
+                if (e.detail && e.detail.value) {
+                    var selectedEngineer = e.detail.value.obj;
+                    console.log('selectedEngineer', selectedEngineer);
+                    this.newTeam.admin = {
+                        'engineerId': selectedEngineer.id,
+                        'name': selectedEngineer.name,
+                        'mobile': selectedEngineer.mobile,
+                        'email': selectedEngineer.email
+                    };
+                }
+
+            }
 
 
-        teamSelected(e) {
+            teamSelected(e) {
 
-            console.log('engineerSelected', e);
-            if (e.detail && e.detail.value) {
-                var selectedTeam = e.detail.value.obj;
-                console.log('selectedTeam', selectedTeam);
-                this.set('selectedTeam', selectedTeam);
+                console.log('engineerSelected', e);
+                if (e.detail && e.detail.value) {
+                    var selectedTeam = e.detail.value.obj;
+                    console.log('selectedTeam', selectedTeam);
+                    this.set('selectedTeam', selectedTeam);
+                }
+
+            }
+
+            createNewTeam() {
+                var newPostKey = firebase.database().ref().child('teams').push().key;
+                var updates = {};
+                updates['/teams/' + newPostKey] = this.newTeam;
+
+                this.newTeam.id = newPostKey;
+
+                firebase.database().ref().update(updates);
+                this.newTeam = {};
+                this.$.addTeamModal.close();
+            }
+
+            onLocateTap(e) {
+                e.stopPropagation();
+                console.log('Locate engineer', e.model.__data.engineer);
+            }
+
+            onRemoveTap(e) {
+                e.stopPropagation();
+                // e.preventDefault();
+                console.log('onRemoveTap', e, e.model.__data.engineer);
+                this.engineerToRemove = e.model.__data.engineer;
+                this.$.removeEngineerModal.open();
+
+            }
+
+            showEngineer(e) {
+                console.log('showEngineer', e, e.model.__data.engineer);
+                this.set('selectedEngineer', e.model.__data.engineer);
+                this.shadowRoot.querySelector("#engineerDetailsDialog").open();
+
+            }
+
+            removeEngineer() {
+                console.log('engineerToRemove', this.engineerToRemove);
+                var updates = {};
+                updates['/engineers/' + this.engineerToRemove.id + '/teams/' + this.selectedTeam.id] = false;
+
+
+                firebase.database().ref().update(updates);
+                /*firebase.database().ref('/engineers_job/' + this.engineerToRemove.id)
+                    .onnce('value', (snap) => {
+                        if(snap.exists()){
+                        }
+                        
+                    });*/
+            }
+
+            updateEngineer() {
+                var enggDescription = this.shadowRoot.querySelector('#enggDescription');
+                enggDescription.update();
             }
 
         }
 
-        createNewTeam() {
-            var newPostKey = firebase.database().ref().child('teams').push().key;
-            var updates = {};
-            updates['/teams/' + newPostKey] = this.newTeam;
-
-            this.newTeam.id = newPostKey;
-
-            firebase.database().ref().update(updates);
-            this.newTeam = {};
-            this.$.addTeamModal.close();
-        }
-
-        onRemoveTap(e) {
-            e.stopPropagation();
-            // e.preventDefault();
-            console.log('onRemoveTap', e, e.model.__data.engineer);
-            this.engineerToRemove = e.model.__data.engineer;
-            this.$.removeEngineerModal.open();
-
-        }
-
-        showJob(e) {
-            console.log('showJob', e, e.model.__data.engineer);
-        }
-
-        removeEngineer() {
-            console.log('engineerToRemove', this.engineerToRemove);
-            var updates = {};
-            updates['/engineers/' + this.engineerToRemove.id + '/teams/' + this.selectedTeam.id] = false;
-
-                    
-            firebase.database().ref().update(updates);
-            /*firebase.database().ref('/engineers_job/' + this.engineerToRemove.id)
-                .onnce('value', (snap) => {
-                    if(snap.exists()){
-                    }
-                    
-                });*/
-        }
-
-    }
-
-    window.customElements.define(EngineersMasters.is, EngineersMasters);
+        window.customElements.define(EngineersMasters.is, EngineersMasters);
     </script>
 </dom-module>

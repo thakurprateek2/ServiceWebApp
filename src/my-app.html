@@ -8,6 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
+<script type="text/javascript" src="../bower_components/lodash/lodash.min.js"></script>
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
@@ -20,6 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <!-- <link rel="import" href="../bower_components/polymerfire/firebase-app.html"> -->
 <script type="text/javascript" src="../bower_components/js-xlsx/dist/xlsx.full.min.js"></script>
 
@@ -32,6 +34,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+
 
 <link rel="import" href="my-icons.html">
 
@@ -44,6 +55,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="customers-masters.html">
 <link rel="lazy-import" href="job-list.html">
 <link rel="lazy-import" href="attendance-report.html">
+<link rel="lazy-import" href="attendance-monthly-report.html">
+
+<link rel="import" href="modal-list-selector.html">
 
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-map/google-map-search.html">
@@ -55,7 +69,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :host {
-        --app-primary-color: #4285f4;
+        --app-primary-color: #202124;
         --app-secondary-color: black;
 
         display: block;
@@ -70,6 +84,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       app-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
         color: #fff;
         background-color: var(--app-primary-color);
       }
@@ -115,6 +134,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: black;
         font-weight: bold;
       }
+
+      .app-title{
+        font-size: 16px;
+        font-family: "Roboto Mono",monospace;
+        text-transform: uppercase;
+      }
     </style>
 
     <!-- <firebase-app
@@ -132,14 +157,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-          <app-header condenses reveals effects="waterfall">
+        <template is="dom-if" if="{{signedIn}}">
+          <app-header condenses fixed effects="waterfall">
     <app-toolbar>
       <paper-icon-button icon="my-icons:menu" on-tap="onMenuButtonClick"></paper-icon-button>
-      <div main-title>Service App</div>
-      <paper-icon-button icon="my-icons:close" on-tap="onLogoutClick"></paper-icon-button>
+      <div main-title class="app-title">Service App</div>
+      <paper-icon-button icon="icons:power-settings-new" on-tap="onLogoutClick"></paper-icon-button>
     </app-toolbar>
         
   </app-header>
+</template>
 
   <app-drawer id="startDrawer" align="start">
     <app-toolbar>Menu</app-toolbar>
@@ -177,6 +204,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a name="attendance-report" href="attendance-report">Attendance</a>
         </template>
 
+        <template is="dom-if" if="{{accessRights.admin}}">
+          <a name="attendance-monthly-report" class="sub-item" href="attendance-monthly-report">Monthly Report</a>
+        </template>
+
 
 
         </iron-selector>
@@ -184,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <app-drawer id="endDrawer" align="end"></app-drawer>
 
-  <iron-pages
+  <iron-pages style="padding-top: 66px;"
             selected="[[page]]"
             attr-for-selected="name"
             fallback-selection="view404"
@@ -196,6 +227,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <customers-masters name="customers-masters"></customers-masters>
           <job-list name="job-list"></job-list>
           <attendance-report name="attendance-report"></attendance-report>
+          <attendance-monthly-report name="attendance-monthly-report"></attendance-monthly-report>
                     
           <my-view404 name="my-view404"></my-view404>
           <my-view-login name="my-view-login"></my-view-login>
@@ -296,6 +328,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             firebase.auth().onAuthStateChanged((user)=> {
               if (user) {
                 // User is signed in.
+                this.signedIn = true;
                 var displayName = user.displayName;
                 var email = user.email;
                 var emailVerified = user.emailVerified;
@@ -320,6 +353,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }else{
 
                   var uid = user.uid;
+                  var newUser = localStorage.getItem('newRegisteredUser');
+                  if(newUser){
+                    newUser = JSON.parse(newUser);                    
+                    if(uid === newUser.uid){
+                      newUser.rights = {
+                            admin: true,
+                            assign_jobs: true,
+                            create_jobs: true, 
+                            update_jobs: true,
+                            masters: true
+                      };
+                      this.createNewEngineer(newUser, (response)=>{
+                        console.log('Resposne', response);
+                        this.accessRights = {
+                          admin: true,
+                          assign_jobs: true,
+                          create_jobs: true, 
+                          update_jobs: true,
+                          masters: true
+                        };
+                        this.page = 'my-view1';
+                      }); 
+                      return;
+                    }
+                  }
+
+                  
 
                    firebase.database().ref('/engineers/').orderByChild("userId").equalTo(uid)
                     .once('value', (snap) => {
@@ -341,6 +401,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 // ...
               } else {
                 // User is signed out.
+                this.signedIn = false;
+                
                 // ...
                 this.page = 'my-view-login'
 
@@ -348,8 +410,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         }
 
+        createNewEngineer(element, callback) {
+                var newElement = {
+                    "name": element.name,
+                    "email": element.email,
+                    "mobile": element.phone,
+                    "userId": element.uid,
+                    "rights":element.rights
+                }
+
+                if (element.alternatePhone) {
+                    newElement.alternatePhone = element.alternatePhone;
+                }
+
+                var newPostKey = firebase.database().ref().child("engineers").push().key;
+                var updates = {};
+                updates['/' + "engineers" + '/' + newPostKey] = newElement;
+
+                newElement.id = newPostKey;
+
+                firebase.database().ref().update(updates).then((response)=>{
+                  callback(response);
+                })
+
+            }
+    
+
       _signedInChanged(){
-        console.log("_signedInChanged")
+        console.log("_signedInChanged", this.signedIn)
         
         /*if(!this.signedIn){
           this.$.drawer.close();
@@ -359,12 +447,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       onLogoutClick(){
-        firebase.auth().signOut()
+        firebase.auth().signOut();
+        this.signedIn = false;
+        
       }
 
       onMenuButtonClick(){
         console.log("onMenuButtonClick")
-        this.$.startDrawer.toggle()
+        this.$.startDrawer.toggle();
 
       }
 

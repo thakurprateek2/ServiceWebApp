@@ -1,0 +1,142 @@
+Job types in master
+
+Jobs Created
+
+...     
+
+
+Jobs by status
+input status
+
+Jobs on going (delayed)
+input ongoing : true
+
+Jobs belonging to a team (set of engineers)
+input team id
+
+*Solution: have jobs inside engineers : no
+
+
+Jobs belonging to a engineer
+input engineer id
+Querry on job list will suffice
+No querrt on engineer_job
+
+
+Closed jobs pagination
+input status
+paginate
+
+
+Job list showing 
+{
+    Job status
+    Job dates
+    Engineer name
+    Machine name
+    Customer name
+    part counts**
+}
+
+
+Enineer list item
+name
+number of jobs assigned
+assigned or not assigned job
+
+
+
+
+Job deatils
+showing details of machines
+
+
+Things that can be modified
+Engineers
+*Modify engineer in engineer as well as job
+*Modify engineer in engineer_job tabe
+*Will have to fetch all jobs by engineer from engineer_job table
+*will get job ids from engineer_job tabe
+*Engineer can't hold all jobs, should only hold current jobs
+*Can we do away with jobs in engineers ?? Yes use engineer_job table to display job list, for engineers as well asd teams
+
+Check job details screen and add only the required fields in job element
+Check all the screens if possible and confirm the data structure
+
+new table
+engineer_job
+eid
+name
+teams : [
+
+]
+[
+    j_id {
+
+        job status
+        machine name
+        customer name
+        parts count **
+        job_dates
+        job_type
+        //Only display fields needed
+
+    }
+]
+
+
+Jobs
+*Modify job in job as well as assigned engineer
+
+Jobs stus change (Web)
+*Modify in job
+*Modify in engineer_job table: use id from engineer element
+
+Job customer reassign
+*Modify in job
+*Modify in engineer_job table: use id from engineer element
+
+
+Job machine reassign
+*Modify in job
+*Modify in engineer_job table: use id from engineer element
+
+
+Job type change
+*Modify in job
+*Modify in engineer_job table: use id from engineer element
+
+
+
+Customers
+*modify customer
+*Get jobs from job list
+*Modify in job as well useing jobs ids from job list
+*Modify in engineer_job table: use id from engineer element in the jobs in job list
+
+
+
+Machines
+*modify customer
+*Get jobs from job list
+*Modify in job as well useing jobs ids from job list
+*Modify in engineer_job table: use id from engineer element in the jobs in job list
+
+Parts
+    
+
+Job reassigned:
+* get the old engineer
+* set engineer_job/old_engid/jobid/ = null
+* change the job elelmen with new engineer
+* add entry to engineer_job
+
+
+Teams
+{List of engineers}
+Can be added and removed
+Modifucations need to be done in both engineer and engineer_job
+
+
+
+

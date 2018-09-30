@@ -1,36 +1,163 @@
+Fix Bug in reschedule (web)
+TODO{
 
-job list
-Job list row 	filter by status, engineer
-Customer Name
-Engineer name 		status
+	Add enginner detail screen (Web)
 
-job details
-Customer details
-address
-last updated at
+	Edit engineer UI (Web)
+
+	Reassign Job UI in Job details (Web and app for admin)
+
+	Change Machine and company
+
+	Make sure job details is accessaable form every where (Web)
+
+
+
+	 Add engineer_job table
+	 *This table is needed as you plan to remove closed jobs from engineer object so when stuff is changed in engineer, this same should be update in closed jobs
+	 COUNTER: Delete the closed job node in engineer when job is marked closed
+
+	 *ON Reopen add node back
+
+	 Change status of job in (web)
+
+	 Use that to update engineer in job when ever engineer is updated or better replace the existing engineer
+
+	 on job update (status or anthing) replace the job object in engineer
+
+	 Also check job reschedule
+
+	 on job reassign remove the relation in engineer_job and remove the job from engineer object (delete the node)
+
+
+	 any customer update/ machine update/ should also happen in related jobs and related jobs fields in engineers (Maybe on updating jobs , it should get replaced in engineers, check for that)
+	 
+
+	 Use functions to add created and updated date in jobs inside engineers
+
+
+	 check notification functionality
+}
+
+TODO{
+	request for parts:
+
+	App{
+
+		In job details 
+		Add request for parts button besides the machine field or below it
+
+		List of parts reuored with status (Cancel option)
+		{
+		requested
+		approved
+		used?
+		}
+
+		On click of add button Open dialog with list of parts available for selection
+		Add to list of Part requirement
+		Add ui for part reqests (Showing count)
+		On Click open dialog showing list
+
+		Add in Job list that part is requested for job
+
+		In DB
+		Add in job the part request object (Maintainable over multiple instances of the job in which ever field)
+		{
+			job id
+
+			parts:{
+				partid: {
+				part name
+				part quantity
+				},
+
+				partid2: {
+				part name
+				part quantity
+				}
+			}
+			
+		}
+
+	}
+
+	Web
+	{	
+		'Jobs in progress card'  to request for parts
+
+		
+		On Click open details
+
+		Show jobs having part requests and count of parts requested
+		Customer name  [(Number) parts requested] [accept] [reject] 
+		(Date)			Make above a button
+
+		[Approve all button]
+		On click do multi path update
+
+		On click of number of parts requested open requested parts list modal
+
+		On click of job open job description
+	}
+
+	Notification card {
+	Show part requests
+	//TODO enlist tasks
+	}
+
+	Update card (Currently engineer list card){
+		//TODO elist tasks
+	}
+
+
+	To Confirm
+	{
+		Mark as accepted
+		Need a way to remind if accepted and not fulfilled in long time
+		When job is closed mark all part request as fullfilled ?? or ask for part request to be fulfilled
+		Send notification
+	}
+}
+
+
+Attendance:
+{	
+	Show location in web app
+	Export attendance to excel 
+}
+
+Excel configuration{
+	//Enlist tasks
+	Update customer,
+ Update machine,
+ Run Update job and assigned engineer when job is updated
+}
 
 TODO
 {
+	job list
+	Job list row 	filter by status, engineer
+	Show status on list
+	Show scheduled/unscheduled on list
+	show scheduled date on list 	
 	Status: 
 		History
 	Pending since
 	On Hold since
+
 }
 
 
-Add Job
-Select Customer
-Select Engineer - Drop down/
 
 TODO
 {
-	Schedule Job (Date and time picker) (Hiding the button in UI)
-	Filter dialog and showing addigned jobs
+	Schedule Job (Date and time picker) 
+	Engineer dialog and showing asssigned jobs
+	Make fields mandatory while adding job
+ 	Validations!!! in add job both app and UI
 }
 
-Select Job type
-Select Machine
-Enter Address (Already filled)
 
 TODO
 {
@@ -54,45 +181,39 @@ TODO
 }
 
 
-Attendance
-Clock in button
-Clock out button
 
-
-
-Update location 
-
+Update location: 
 TODO {
 	location history
 }
 
 
-Add engineer_job table
- Use that to update engineer in job when ever engineer is updated or better replace the existing engineer
-
- on job update (status or anthing) replace the job object in engineer
-
- on job reassign remove the relation in engineer_job and remove the job from engineer object (delete the node)
 
 
- show progress while checking if admin or engineer
 
 
- Logout
 
- Use functions to add created and updated date in jobs inside engineers
+Low priority:
 
+FInd place for constanst in webapp
 
- check notification functionality
+Look what is 'updatedTime1' in my-view1.html
 
- while marking attendance check for timezone n other stuff
+Use child_added instead of value event in both app and web to improve performance
 
+Ensure validation in edit engineer (web)
 
- any customer update/ machine update/ should also happen in related jobs and related jobs fields in engineers (Maybe on updating jobs , it should get replaced in engineers, check for that)
+Add schedule date in appgetDateFromTime
 
- Validations!!! in add job both app and UI
+While open allow to edit shedule time ?
 
- Constansts for Job types
+Modify job access righs
+
+Implementation of access rights
+
+ Test if attendance timing entered is same as shown in web app
+
+ Constansts for Job types (web)
 
 
  RemoteDBLocation lat , longitude values in android Double
@@ -102,3 +223,17 @@ Add engineer_job table
  Disable update button until job is loaded
 
  request location permission again if not provided while marking attendance
+
+ Check if you can have just once call(Which will also call on update) for engineers which entire app can use
+ See if the same thing can be done for webapp
+
+ changes in map on engineer list (Change in the field where location is stored)
+
+ Table in job description element has improper allignment
+
+
+ show list of jobs in engineers details
+
+ 
+
+ (web) check the meaning of reflectToAttribute and notify and remove where not required
